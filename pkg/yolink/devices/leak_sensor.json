@@ -1,0 +1,407 @@
+{
+  "name": "LeakSensor",
+  "methods": [
+    {
+      "name": "getState",
+      "description": "Get Leak Sensor's State",
+      "request": {
+        "method": "getState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "online": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Is device online"
+          },
+          "state": {
+            "state": {
+              "type": "AlarmState",
+              "required": true,
+              "comment": "['normal','alert']"
+            },
+            "battery": {
+              "type": "BatteryLevel",
+              "required": true,
+              "comment": "Battery level 0-4"
+            },
+            "beep": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is sounding alarm"
+            },
+            "devTemperature": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Device temperature"
+            },
+            "interval": {
+              "type": "Integer",
+              "required": false,
+              "comment": "Continuous alert interval"
+            },
+            "sensitivity": {
+              "type": "LeakSensorSensitivity",
+              "required": true,
+              "comment": "Sensitivity level"
+            },
+            "sensorMode": {
+              "type": "LeakSensorMode",
+              "required": true,
+              "comment": "Operating mode"
+            },
+            "stateChangedAt": {
+              "type": "Timestamp",
+              "required": true,
+              "comment": "Last state change time"
+            },
+            "supportChangeMode": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Supports mode change"
+            },
+            "version": {
+              "type": "String",
+              "required": true,
+              "comment": "Firmware version"
+            },
+            "alarmState": {
+              "stayError": {
+                "type": "Boolean"
+              },
+              "detectorError": {
+                "type": "Boolean"
+              },
+              "freezeError": {
+                "type": "Boolean"
+              },
+              "reminder": {
+                "type": "Boolean"
+              }
+            }
+          },
+          "reportAt": {
+            "type": "Datetime",
+            "required": true,
+            "comment": "Report time"
+          },
+          "deviceId": {
+            "type": "String",
+            "required": true,
+            "comment": "Device ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "setSettings",
+      "description": "Set settings for leak sensor",
+      "request": {
+        "method": "setSettings",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "interval": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Continuous alarm interval minutes"
+          },
+          "beep": {
+            "type": "Boolean",
+            "required": false,
+            "comment": "Enable beep on alert"
+          },
+          "sensorMode": {
+            "type": "LeakSensorMode",
+            "required": false,
+            "comment": "Work mode ['WaterPeak','WaterLeak']"
+          },
+          "sensitivity": {
+            "type": "LeakSensorSensitivity",
+            "required": false,
+            "comment": "['low','high']"
+          }
+        }
+      },
+      "response": {}
+    },
+    {
+      "name": "getActivityLogs",
+      "description": "Retrieve device activity records. Requires DEVICE.HISTORICAL_DATA.READ permission.",
+      "request": {
+        "method": "getActivityLogs",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "search": {
+            "startDate": {
+              "type": "String",
+              "required": false,
+              "comment": "YYYY-MM-DD"
+            },
+            "endDate": {
+              "type": "String",
+              "required": false,
+              "comment": "YYYY-MM-DD"
+            }
+          },
+          "retrievalKey": {
+            "type": "String",
+            "required": false,
+            "comment": "Retrieval key"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "logs": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "id": {
+                "type": "String",
+                "required": true
+              },
+              "time": {
+                "type": "Date",
+                "required": true
+              },
+              "data": {
+                "type": "Object",
+                "required": true
+              }
+            }
+          },
+          "retrievalKeys": {
+            "next": {
+              "type": "Object",
+              "required": false
+            }
+          }
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "Report",
+      "description": "Periodic leak sensor state report",
+      "response": {
+        "data": {
+          "sensorMode": {
+            "type": "String",
+            "required": true,
+            "comment": "WaterLeak | ..."
+          },
+          "supportChangeMode": {
+            "type": "Boolean",
+            "required": true
+          },
+          "state": {
+            "type": "AlarmState",
+            "required": true
+          },
+          "alarmState": {
+            "stayError": {
+              "type": "Boolean",
+              "required": true
+            },
+            "detectorError": {
+              "type": "Boolean",
+              "required": true
+            },
+            "freezeError": {
+              "type": "Boolean",
+              "required": true
+            },
+            "reminder": {
+              "type": "Boolean",
+              "required": true
+            }
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true
+          },
+          "interval": {
+            "type": "Integer",
+            "required": true
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "devTemperature": {
+            "type": "Integer",
+            "required": false
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "name": "Alert",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "state": {
+            "type": "AlarmState",
+            "required": true,
+            "comment": "['normal','alert']"
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true,
+            "comment": "Battery level 0-4"
+          },
+          "beep": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Is sounding alarm"
+          },
+          "devTemperature": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Device temperature"
+          },
+          "interval": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Continuous alert interval"
+          },
+          "sensitivity": {
+            "type": "LeakSensorSensitivity",
+            "required": true,
+            "comment": "Sensitivity level"
+          },
+          "sensorMode": {
+            "type": "LeakSensorMode",
+            "required": true,
+            "comment": "Operating mode"
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": false
+          },
+          "supportChangeMode": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Supports mode change"
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "alarmState": {
+            "stayError": {
+              "type": "Boolean"
+            },
+            "detectorError": {
+              "type": "Boolean"
+            },
+            "freezeError": {
+              "type": "Boolean"
+            },
+            "reminder": {
+              "type": "Boolean"
+            }
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "StatusChange",
+      "description": "Fired when leak sensor state changes",
+      "response": {
+        "data": {
+          "sensorMode": {
+            "type": "String",
+            "required": true,
+            "comment": "WaterLeak | ..."
+          },
+          "state": {
+            "type": "AlarmState",
+            "required": true
+          },
+          "alarmState": {
+            "stayError": {
+              "type": "Boolean",
+              "required": true
+            },
+            "detectorError": {
+              "type": "Boolean",
+              "required": true
+            },
+            "freezeError": {
+              "type": "Boolean",
+              "required": true
+            },
+            "reminder": {
+              "type": "Boolean",
+              "required": true
+            }
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "devTemperature": {
+            "type": "Integer",
+            "required": false
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": true
+          }
+        }
+      }
+    }
+  ]
+}

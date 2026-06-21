@@ -1,0 +1,601 @@
+{
+  "name": "Dimmer",
+  "methods": [
+    {
+      "name": "getState",
+      "description": "Get Current State",
+      "request": {
+        "method": "getState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "type": "SwitchState",
+            "required": true,
+            "comment": "['closed','open']"
+          },
+          "brightness": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Brightness 1-100"
+          },
+          "delay": {
+            "on": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Remain Delay ON minutes"
+            },
+            "off": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Remain Delay OFF minutes"
+            }
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Timezone -12~12"
+          }
+        }
+      }
+    },
+    {
+      "name": "setState",
+      "description": "Set Dimmer's State",
+      "request": {
+        "method": "setState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "state": {
+            "type": "SwitchCommand",
+            "required": true,
+            "comment": "['close','open']"
+          },
+          "brightness": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Brightness 1-100"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "type": "SwitchState",
+            "required": true,
+            "comment": "['closed','open']"
+          }
+        }
+      }
+    },
+    {
+      "name": "setDelay",
+      "description": "Set delay to turn on/off Dimmer",
+      "request": {
+        "method": "setDelay",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "delayOn": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Delay ON minutes; 0=cancel"
+          },
+          "delayOff": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Delay OFF minutes; 0=cancel"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "delay": {
+            "on": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Remain Delay ON minutes"
+            },
+            "off": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Remain Delay OFF minutes"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "getSchedules",
+      "description": "Get Schedule List",
+      "request": {
+        "method": "getSchedules",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "type": "Array",
+          "required": true,
+          "items": {
+            "isValid": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Enabled/Disabled"
+            },
+            "index": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Index of record"
+            },
+            "on": {
+              "type": "String",
+              "required": false,
+              "comment": "Time to turn on HH:mm"
+            },
+            "off": {
+              "type": "String",
+              "required": false,
+              "comment": "Time to turn off HH:mm"
+            },
+            "week": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Weekday mask Sunday-Saturday"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "setSchedules",
+      "description": "Set Schedule",
+      "request": {
+        "method": "setSchedules",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "sches": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "isValid": {
+                "type": "Boolean",
+                "required": true,
+                "comment": "Enabled/Disabled"
+              },
+              "index": {
+                "type": "Integer",
+                "required": true,
+                "comment": "Index 0-5"
+              },
+              "on": {
+                "type": "String",
+                "required": true,
+                "comment": "Time to turn on HH:mm"
+              },
+              "off": {
+                "type": "String",
+                "required": true,
+                "comment": "Time to turn off HH:mm"
+              },
+              "week": {
+                "type": "Integer",
+                "required": true,
+                "comment": "Weekday mask"
+              }
+            }
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "type": "Array",
+          "required": true,
+          "items": {
+            "isValid": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Enabled/Disabled"
+            },
+            "index": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Index of record"
+            },
+            "on": {
+              "type": "String",
+              "required": false,
+              "comment": "Time to turn on HH:mm"
+            },
+            "off": {
+              "type": "String",
+              "required": false,
+              "comment": "Time to turn off HH:mm"
+            },
+            "week": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Weekday mask Sunday-Saturday"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "getVersion",
+      "description": "Get firmware info",
+      "request": {
+        "method": "getVersion",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Current version"
+          },
+          "newVersion": {
+            "versionId": {
+              "type": "String",
+              "required": false,
+              "comment": "Newest version ID"
+            },
+            "versionCode": {
+              "type": "String",
+              "required": false,
+              "comment": "Newest version code"
+            },
+            "fileSize": {
+              "type": "String",
+              "required": false,
+              "comment": "Newest version file size"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "setDeviceAttributes",
+      "description": "Set dimmer's attributes",
+      "request": {
+        "method": "setDeviceAttributes",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "led": {
+            "status": {
+              "type": "String",
+              "required": false,
+              "comment": "Status LED ['on','off']"
+            },
+            "level": {
+              "type": "String",
+              "required": false,
+              "comment": "Brightness LED ['on','off']"
+            }
+          },
+          "gradient": {
+            "on": {
+              "type": "Integer",
+              "required": false,
+              "comment": "Gentle on seconds 0-20"
+            },
+            "off": {
+              "type": "Integer",
+              "required": false,
+              "comment": "Gentle off seconds 0-20"
+            }
+          },
+          "calibration": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Dimming calibration low 0-99"
+          },
+          "calibrationHigh": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Dimming calibration high 0-99"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "deviceAttributes": {
+            "led": {
+              "status": {
+                "type": "String",
+                "required": true
+              },
+              "level": {
+                "type": "String",
+                "required": true
+              }
+            },
+            "gradient": {
+              "on": {
+                "type": "Integer",
+                "required": true
+              },
+              "off": {
+                "type": "Integer",
+                "required": true
+              }
+            },
+            "calibration": {
+              "type": "Integer",
+              "required": true
+            },
+            "calibrationHigh": {
+              "type": "Integer",
+              "required": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "startUpgrade",
+      "description": "Start firmware upgrade",
+      "request": {
+        "method": "startUpgrade",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "versionId": {
+            "type": "String",
+            "required": true,
+            "comment": "Version ID to upgrade to"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "isStarted": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Is upgrading started"
+          }
+        }
+      }
+    },
+    {
+      "name": "getActivityLogs",
+      "description": "Retrieve device activity records. Requires DEVICE.HISTORICAL_DATA.READ permission.",
+      "request": {
+        "method": "getActivityLogs",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "search": {
+            "startDate": {
+              "type": "String",
+              "required": false,
+              "comment": "YYYY-MM-DD"
+            },
+            "endDate": {
+              "type": "String",
+              "required": false,
+              "comment": "YYYY-MM-DD"
+            }
+          },
+          "retrievalKey": {
+            "type": "String",
+            "required": false,
+            "comment": "Retrieval key for pagination"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "logs": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "id": {
+                "type": "String",
+                "required": true,
+                "comment": "Record ID"
+              },
+              "time": {
+                "type": "Date",
+                "required": true,
+                "comment": "Record time"
+              },
+              "data": {
+                "type": "Object",
+                "required": true,
+                "comment": "Record data"
+              }
+            }
+          },
+          "retrievalKeys": {
+            "next": {
+              "type": "Object",
+              "required": false,
+              "comment": "Key for more results"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "Report",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "state": {
+            "type": "SwitchState",
+            "required": true,
+            "comment": "['closed','open']"
+          },
+          "brightness": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Brightness 1-100"
+          },
+          "delay": {
+            "on": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Remain Delay ON minutes"
+            },
+            "off": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Remain Delay OFF minutes"
+            }
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Timezone -12~12"
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Alert",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "state": {
+            "type": "SwitchState",
+            "required": true,
+            "comment": "['closed','open']"
+          },
+          "brightness": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Brightness 1-100"
+          },
+          "delay": {
+            "on": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Remain Delay ON minutes"
+            },
+            "off": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Remain Delay OFF minutes"
+            }
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Timezone -12~12"
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": false
+          }
+        }
+      }
+    }
+  ]
+}

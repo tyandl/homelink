@@ -1,0 +1,15 @@
+{
+  "name": "CSDevice",
+  "description": "Custom/CS device with raw send methods",
+  "methods": [
+    {
+      "name": "send",
+      "description": "Send data to device, wait for response (default timeout 4s)"
+    },
+    {
+      "name": "sendNoWait",
+      "description": "Send data to device, don't wait for response"
+    }
+  ],
+  "dispatch": "send"
+}

@@ -1,0 +1,570 @@
+{
+  "name": "LockV2",
+  "description": "Advanced lock with fingerprint, card, fob, and code credential support",
+  "methods": [
+    {
+      "name": "fetchState",
+      "description": "Fetch current status from cache",
+      "request": {
+        "method": "fetchState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "state": {
+              "lock": {
+                "type": "LockState",
+                "required": true,
+                "comment": "['locked','unlocked']"
+              }
+            },
+            "attributes": {
+              "autoLock": {
+                "type": "Integer",
+                "required": true,
+                "comment": "Auto lock duration seconds; 0=disable"
+              },
+              "enableSetButton": {
+                "type": "Boolean",
+                "required": true
+              },
+              "rlSet": {
+                "type": "LatchSide",
+                "required": true,
+                "comment": "['left','right']"
+              },
+              "soundLevel": {
+                "type": "LockSoundLevel",
+                "required": true,
+                "comment": "[0-3] mute/low/medium/high"
+              }
+            },
+            "battery": {
+              "type": "BatteryLevel",
+              "required": true,
+              "comment": "0-4"
+            }
+          },
+          "hwVersion": {
+            "type": "String",
+            "required": true,
+            "comment": "Hardware version"
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "name": "getState",
+      "description": "Get current status from device",
+      "request": {
+        "method": "getState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "lock": {
+              "type": "LockState",
+              "required": true,
+              "comment": "['locked','unlocked']"
+            }
+          },
+          "attributes": {
+            "autoLock": {
+              "type": "Integer",
+              "required": true
+            },
+            "enableSetButton": {
+              "type": "Boolean",
+              "required": true
+            },
+            "rlSet": {
+              "type": "LatchSide",
+              "required": true,
+              "comment": "['left','right']"
+            },
+            "soundLevel": {
+              "type": "LockSoundLevel",
+              "required": true,
+              "comment": "[0-3]"
+            }
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true
+          },
+          "hwVersion": {
+            "type": "String",
+            "required": true
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "name": "setState",
+      "description": "Lock or Unlock the door",
+      "request": {
+        "method": "setState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "state": {
+            "lock": {
+              "type": "LockState",
+              "required": true,
+              "comment": "['locked','unlocked']"
+            }
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "lock": {
+              "type": "LockState",
+              "required": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "setAttributes",
+      "description": "Set lock attributes",
+      "request": {
+        "method": "setAttributes",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "autoLock": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Auto lock seconds; 0=disable"
+          },
+          "rlSet": {
+            "type": "LatchSide",
+            "required": false,
+            "comment": "['left','right']"
+          },
+          "soundLevel": {
+            "type": "LockSoundLevel",
+            "required": false,
+            "comment": "[0-3]"
+          },
+          "enableSetButton": {
+            "type": "Boolean",
+            "required": false
+          }
+        }
+      },
+      "response": {
+        "params": {
+          "autoLock": {
+            "type": "Integer",
+            "required": true
+          },
+          "rlSet": {
+            "type": "LatchSide",
+            "required": true
+          },
+          "soundLevel": {
+            "type": "LockSoundLevel",
+            "required": true
+          },
+          "enableSetButton": {
+            "type": "Boolean",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "name": "userManagement",
+      "description": "User and credential management. Use params.command to specify the operation.",
+      "commands": {
+        "getTemporaryCredentials": {
+          "description": "Get list of temporary credentials",
+          "request_params": {
+            "params": {
+              "command": "getTemporaryCredentials",
+              "`type`": {
+                "type": "LockCredentialType",
+                "required": true,
+                "comment": "['OneTime','RangeTime','PeriodTime']"
+              }
+            }
+          },
+          "response_fields": {
+            "data": {
+              "credentials": {
+                "type": "Array",
+                "required": true,
+                "items": {
+                  "id": {
+                    "type": "Integer",
+                    "required": true
+                  },
+                  "cipher": {
+                    "`type`": {
+                      "type": "String",
+                      "required": true,
+                      "comment": "['Password']"
+                    },
+                    "secret": {
+                      "type": "String",
+                      "required": true,
+                      "comment": "Base64 encoded"
+                    }
+                  },
+                  "startAt": {
+                    "type": "Long",
+                    "required": false,
+                    "comment": "Effective timestamp ms"
+                  },
+                  "endAt": {
+                    "type": "Long",
+                    "required": false,
+                    "comment": "Expiration timestamp ms"
+                  },
+                  "effectivePeriod": {
+                    "`type`": {
+                      "type": "ScheduleType",
+                      "required": true,
+                      "comment": "['disable','weekly','monthly']"
+                    },
+                    "value": {
+                      "type": "String[]",
+                      "required": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "addTemporaryCredential": {
+          "description": "Add a temporary credential (max 3 per type)",
+          "request_params": {
+            "params": {
+              "command": "addTemporaryCredential",
+              "`type`": {
+                "type": "LockCredentialType",
+                "required": true,
+                "comment": "['OneTime','RangeTime','PeriodTime']"
+              },
+              "cipher": {
+                "`type`": {
+                  "type": "String",
+                  "required": true,
+                  "comment": "['Password']"
+                },
+                "secret": {
+                  "type": "String",
+                  "required": false,
+                  "comment": "Base64 encoded (required if Password)"
+                }
+              },
+              "startAt": {
+                "type": "Long",
+                "required": false,
+                "comment": "Effective timestamp ms"
+              },
+              "endAt": {
+                "type": "Long",
+                "required": false,
+                "comment": "Expiration timestamp ms"
+              },
+              "effectivePeriod": {
+                "`type`": {
+                  "type": "String",
+                  "required": true
+                },
+                "value": {
+                  "type": "String[]",
+                  "required": false
+                }
+              },
+              "effectiveStartTime": {
+                "type": "String",
+                "required": false,
+                "comment": "H:m"
+              },
+              "effectiveEndTime": {
+                "type": "String",
+                "required": false,
+                "comment": "H:m"
+              }
+            }
+          }
+        },
+        "delTemporaryCredential": {
+          "request_params": {
+            "params": {
+              "command": "delTemporaryCredential",
+              "credentialId": {
+                "type": "Integer",
+                "required": true
+              }
+            }
+          }
+        },
+        "getUserList": {
+          "description": "Get user list (max 12 users)",
+          "request_params": {
+            "params": {
+              "command": "getUserList"
+            }
+          },
+          "response_fields": {
+            "data": {
+              "users": {
+                "type": "Array",
+                "required": true,
+                "items": {
+                  "id": {
+                    "type": "Integer",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delUser": {
+          "request_params": {
+            "params": {
+              "command": "delUser",
+              "userId": {
+                "type": "Integer",
+                "required": true
+              }
+            }
+          }
+        },
+        "getUserCredentials": {
+          "request_params": {
+            "params": {
+              "command": "getUserCredentials",
+              "userId": {
+                "type": "Integer",
+                "required": true
+              }
+            }
+          },
+          "response_fields": {
+            "data": {
+              "credentials": {
+                "type": "Array",
+                "required": true,
+                "items": {
+                  "id": {
+                    "type": "Integer",
+                    "required": true
+                  },
+                  "cipher": {
+                    "`type`": {
+                      "type": "LockCipherType",
+                      "required": true,
+                      "comment": "['Fingerprint','Card','Fob','Code']"
+                    },
+                    "secret": {
+                      "type": "String",
+                      "required": false,
+                      "comment": "Required if Code"
+                    }
+                  },
+                  "startAt": {
+                    "type": "Long",
+                    "required": true
+                  },
+                  "endAt": {
+                    "type": "Long",
+                    "required": true
+                  },
+                  "effectivePeriod": {
+                    "`type`": {
+                      "type": "String",
+                      "required": true
+                    }
+                  },
+                  "effectiveStartTime": {
+                    "type": "String",
+                    "required": true,
+                    "comment": "H:m"
+                  },
+                  "effectiveEndTime": {
+                    "type": "String",
+                    "required": true,
+                    "comment": "H:m"
+                  },
+                  "effectiveTimes": {
+                    "type": "Integer",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "addUserCredential": {
+          "request_params": {
+            "params": {
+              "command": "addUserCredential",
+              "userId": {
+                "type": "Integer",
+                "required": true
+              },
+              "cipher": {
+                "`type`": {
+                  "type": "LockCipherType",
+                  "required": true,
+                  "comment": "['Fingerprint','Card','Fob','Code']"
+                },
+                "secret": {
+                  "type": "String",
+                  "required": true,
+                  "comment": "Base64; required if Code; length 4-8"
+                }
+              },
+              "effectivePeriod": {
+                "`type`": {
+                  "type": "String",
+                  "required": true
+                }
+              },
+              "effectiveStartTime": {
+                "type": "String",
+                "required": true,
+                "comment": "H:m"
+              },
+              "effectiveEndTime": {
+                "type": "String",
+                "required": true,
+                "comment": "H:m"
+              },
+              "effectiveTimes": {
+                "type": "Integer",
+                "required": true,
+                "comment": "0=no limit"
+              }
+            }
+          }
+        },
+        "delUserCredential": {
+          "request_params": {
+            "params": {
+              "command": "delUserCredential",
+              "userId": {
+                "type": "Integer",
+                "required": true
+              },
+              "credentialId": {
+                "type": "Integer",
+                "required": true
+              },
+              "cipherType": {
+                "type": "LockCipherType",
+                "required": false,
+                "comment": "['Fingerprint','Card','Fob','Code']"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "Report",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "lock": {
+            "type": "LockState",
+            "required": true,
+            "comment": "['locked','unlocked']"
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Alert",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "lock": {
+            "type": "LockState",
+            "required": true,
+            "comment": "['locked','unlocked']"
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": false
+          }
+        }
+      }
+    }
+  ]
+}

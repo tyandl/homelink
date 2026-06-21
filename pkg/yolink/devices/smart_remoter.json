@@ -1,0 +1,171 @@
+{
+  "name": "SmartRemoter",
+  "methods": [
+    {
+      "name": "getState",
+      "description": "Get last reported state of Smart Remoter",
+      "request": {
+        "method": "getState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "time": {
+          "type": "Date",
+          "required": true,
+          "comment": "Current timestamp"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "online": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Is device online"
+          },
+          "state": {
+            "event": {
+              "keyMask": {
+                "type": "Integer",
+                "required": false,
+                "comment": "Triggered keys bitmask (bits 0-7)"
+              },
+              "`type`": {
+                "type": "SmartRemoterEventType",
+                "required": false,
+                "comment": "['Press','LongPress']"
+              }
+            },
+            "battery": {
+              "type": "BatteryLevel",
+              "required": true,
+              "comment": "Battery level 0-4"
+            },
+            "version": {
+              "type": "String",
+              "required": true,
+              "comment": "Firmware version"
+            },
+            "devTemperature": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Device temperature"
+            },
+            "beep": {
+              "type": "Boolean",
+              "required": true
+            }
+          },
+          "reportAt": {
+            "type": "Datetime",
+            "required": true
+          },
+          "deviceId": {
+            "type": "String",
+            "required": true
+          }
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "Report",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "event": {
+            "keyMask": {
+              "type": "Integer",
+              "required": false,
+              "comment": "Triggered keys bitmask (bits 0-7)"
+            },
+            "`type`": {
+              "type": "SmartRemoterEventType",
+              "required": false,
+              "comment": "['Press','LongPress']"
+            }
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true,
+            "comment": "Battery level 0-4"
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "devTemperature": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Device temperature"
+          },
+          "beep": {
+            "type": "Boolean",
+            "required": true
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Alert",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "event": {
+            "keyMask": {
+              "type": "Integer",
+              "required": false,
+              "comment": "Triggered keys bitmask (bits 0-7)"
+            },
+            "`type`": {
+              "type": "SmartRemoterEventType",
+              "required": false,
+              "comment": "['Press','LongPress']"
+            }
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true,
+            "comment": "Battery level 0-4"
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "devTemperature": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Device temperature"
+          },
+          "beep": {
+            "type": "Boolean",
+            "required": true
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": false
+          }
+        }
+      }
+    }
+  ]
+}

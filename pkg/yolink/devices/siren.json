@@ -1,0 +1,279 @@
+{
+  "name": "Siren",
+  "methods": [
+    {
+      "name": "getState",
+      "description": "Get the state of siren",
+      "request": {
+        "method": "getState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "type": "AlarmState",
+            "required": true,
+            "comment": "['normal','alert','off']"
+          },
+          "soundLevel": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Volume"
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true,
+            "comment": "Battery level"
+          },
+          "powerSupply": {
+            "type": "PowerSupply",
+            "required": true,
+            "comment": "['battery','usb']"
+          },
+          "alarmDuation": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Alert duration"
+          },
+          "mute": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Muted"
+          },
+          "muteDuration": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Mute duration seconds"
+          },
+          "muteRemaining": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Seconds remaining in mute"
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Timezone -12~12"
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "setState",
+      "description": "Set the state of siren",
+      "request": {
+        "method": "setState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "state": {
+            "alarm": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "true=start alert, false=stop alert"
+            }
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "type": "AlarmState",
+            "required": true,
+            "comment": "['normal','alert','off']"
+          }
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "Report",
+      "description": "Periodic siren state report",
+      "response": {
+        "data": {
+          "state": {
+            "type": "AlarmState",
+            "required": true
+          },
+          "soundLevel": {
+            "type": "Integer",
+            "required": true
+          },
+          "mute": {
+            "type": "Boolean",
+            "required": true
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true
+          },
+          "powerSupply": {
+            "type": "String",
+            "required": true,
+            "comment": "usb | battery"
+          },
+          "alarmDuation": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Alarm duration seconds (sic)"
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "muteDuration": {
+            "type": "Integer",
+            "required": true
+          },
+          "muteRemaining": {
+            "type": "Integer",
+            "required": true
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "StatusChange",
+      "response": {
+        "data": {
+          "state": {
+            "type": "AlarmState",
+            "required": true
+          },
+          "soundLevel": {
+            "type": "Integer",
+            "required": true
+          },
+          "mute": {
+            "type": "Boolean",
+            "required": true
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true
+          },
+          "powerSupply": {
+            "type": "String",
+            "required": true,
+            "comment": "usb | battery"
+          },
+          "alarmDuation": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Alarm duration seconds (sic)"
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Alert",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "state": {
+            "type": "AlarmState",
+            "required": true,
+            "comment": "['normal','alert','off']"
+          },
+          "soundLevel": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Volume"
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true,
+            "comment": "Battery level"
+          },
+          "powerSupply": {
+            "type": "PowerSupply",
+            "required": true,
+            "comment": "['battery','usb']"
+          },
+          "alarmDuation": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Alert duration"
+          },
+          "mute": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Muted"
+          },
+          "muteDuration": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Mute duration seconds"
+          },
+          "muteRemaining": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Seconds remaining in mute"
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Timezone -12~12"
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": false
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,250 @@
+{
+  "name": "Hub",
+  "methods": [
+    {
+      "name": "getState",
+      "description": "Get Hub's State",
+      "request": {
+        "method": "getState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Hub version"
+          },
+          "wifi": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is WiFi connected"
+            },
+            "ssid": {
+              "type": "String",
+              "required": true,
+              "comment": "Current WiFi SSID"
+            },
+            "ip": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi IP"
+            },
+            "gateway": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi gateway"
+            },
+            "mask": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi subnet mask"
+            }
+          },
+          "eth": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is Ethernet connected"
+            },
+            "ip": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet IP"
+            },
+            "gateway": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet gateway"
+            },
+            "mask": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet subnet mask"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "setWiFi",
+      "description": "Set hub's WiFi info (when online)",
+      "request": {
+        "method": "setWiFi",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "ssid": {
+            "type": "String",
+            "required": true,
+            "comment": "WiFi SSID"
+          },
+          "password": {
+            "type": "String",
+            "required": true,
+            "comment": "WiFi password"
+          }
+        }
+      },
+      "response": {}
+    }
+  ],
+  "events": [
+    {
+      "name": "Report",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Hub version"
+          },
+          "wifi": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is WiFi connected"
+            },
+            "ssid": {
+              "type": "String",
+              "required": true,
+              "comment": "Current WiFi SSID"
+            },
+            "ip": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi IP"
+            },
+            "gateway": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi gateway"
+            },
+            "mask": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi subnet mask"
+            }
+          },
+          "eth": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is Ethernet connected"
+            },
+            "ip": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet IP"
+            },
+            "gateway": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet gateway"
+            },
+            "mask": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet subnet mask"
+            }
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Alert",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Hub version"
+          },
+          "wifi": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is WiFi connected"
+            },
+            "ssid": {
+              "type": "String",
+              "required": true,
+              "comment": "Current WiFi SSID"
+            },
+            "ip": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi IP"
+            },
+            "gateway": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi gateway"
+            },
+            "mask": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi subnet mask"
+            }
+          },
+          "eth": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is Ethernet connected"
+            },
+            "ip": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet IP"
+            },
+            "gateway": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet gateway"
+            },
+            "mask": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet subnet mask"
+            }
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": false
+          }
+        }
+      }
+    }
+  ]
+}

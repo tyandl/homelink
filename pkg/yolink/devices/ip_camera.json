@@ -1,0 +1,602 @@
+{
+  "name": "IPCamera",
+  "methods": [
+    {
+      "name": "getState",
+      "description": "Get Current State",
+      "request": {
+        "method": "getState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "online": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Is device online"
+          },
+          "wifi": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is WiFi connected"
+            },
+            "ip": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi IP"
+            },
+            "mask": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi subnet mask"
+            },
+            "gateway": {
+              "type": "String",
+              "required": false,
+              "comment": "WiFi gateway"
+            },
+            "mac": {
+              "type": "String",
+              "required": false,
+              "comment": "WiFi MAC address"
+            },
+            "rssi": {
+              "type": "Integer",
+              "required": true,
+              "comment": "WiFi RSSI"
+            }
+          },
+          "volume": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Speaker volume [0-5]"
+          },
+          "recordMode": {
+            "type": "RecordMode",
+            "required": true,
+            "comment": "['full-time','alarm','off']"
+          },
+          "indicatorLight": {
+            "type": "String",
+            "required": true,
+            "comment": "['on','off']"
+          },
+          "voicePrompts": {
+            "type": "String",
+            "required": true,
+            "comment": "['on','off']"
+          },
+          "maxManualRecordTime": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Max manual recording time in minutes"
+          },
+          "nightVision": {
+            "type": "NightVision",
+            "required": true,
+            "comment": "['on','off','auto']"
+          },
+          "soundDetection": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Sound detection enabled"
+            },
+            "level": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Sound detection sensitivity [0-5]"
+            }
+          },
+          "motionDetection": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Motion detection enabled"
+            },
+            "level": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Motion detection sensitivity [0-4]"
+            }
+          },
+          "storage": {
+            "total": {
+              "type": "Integer",
+              "required": true,
+              "comment": "SD card total capacity (MB)"
+            },
+            "free": {
+              "type": "Integer",
+              "required": true,
+              "comment": "SD card free capacity (MB)"
+            },
+            "sdFormat": {
+              "type": "String",
+              "required": true,
+              "comment": "SD card format"
+            },
+            "rwMode": {
+              "type": "String",
+              "required": true,
+              "comment": "SD card read-write mode"
+            }
+          },
+          "soundEnable": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Sound enabled"
+          },
+          "privacyMode": {
+            "type": "String",
+            "required": true,
+            "comment": "['on','off']"
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Timezone"
+          }
+        }
+      }
+    },
+    {
+      "name": "setProperties",
+      "description": "Set device's properties",
+      "request": {
+        "method": "setProperties",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "volume": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Speaker volume [0-5]"
+          },
+          "indicatorLight": {
+            "type": "String",
+            "required": false,
+            "comment": "['on','off']"
+          },
+          "voicePrompts": {
+            "type": "String",
+            "required": false,
+            "comment": "['on','off']"
+          },
+          "maxManualRecordTime": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Max manual recording time in minutes"
+          },
+          "nightVision": {
+            "type": "NightVision",
+            "required": false,
+            "comment": "['on','off','auto']"
+          },
+          "soundDetection": {
+            "enable": {
+              "type": "Boolean",
+              "required": false
+            },
+            "level": {
+              "type": "Integer",
+              "required": false,
+              "comment": "[0-5]"
+            }
+          },
+          "motionDetection": {
+            "enable": {
+              "type": "Boolean",
+              "required": false
+            },
+            "level": {
+              "type": "Integer",
+              "required": false,
+              "comment": "[0-4]"
+            }
+          },
+          "soundEnable": {
+            "type": "Boolean",
+            "required": false
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "success": {
+            "type": "Boolean",
+            "required": true
+          },
+          "code": {
+            "type": "Integer",
+            "required": true,
+            "comment": "200=success"
+          }
+        }
+      }
+    },
+    {
+      "name": "startRecording",
+      "description": "Start local video recording",
+      "request": {
+        "method": "startRecording",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "audioEnable": {
+            "type": "Boolean",
+            "required": false,
+            "comment": "Record audio; default true"
+          },
+          "duration": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Recording duration in minutes"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "success": {
+            "type": "Boolean",
+            "required": true
+          },
+          "code": {
+            "type": "Integer",
+            "required": true,
+            "comment": "200=started"
+          }
+        }
+      }
+    },
+    {
+      "name": "stopRecording",
+      "description": "Stop local recording",
+      "request": {
+        "method": "stopRecording",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "success": {
+            "type": "Boolean",
+            "required": true
+          },
+          "code": {
+            "type": "Integer",
+            "required": true,
+            "comment": "200=stopped"
+          }
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "Report",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "wifi": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is WiFi connected"
+            },
+            "ip": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi IP"
+            },
+            "mask": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi subnet mask"
+            },
+            "gateway": {
+              "type": "String",
+              "required": false,
+              "comment": "WiFi gateway"
+            },
+            "mac": {
+              "type": "String",
+              "required": false,
+              "comment": "WiFi MAC address"
+            },
+            "rssi": {
+              "type": "Integer",
+              "required": true,
+              "comment": "WiFi RSSI"
+            }
+          },
+          "volume": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Speaker volume [0-5]"
+          },
+          "recordMode": {
+            "type": "RecordMode",
+            "required": true,
+            "comment": "['full-time','alarm','off']"
+          },
+          "indicatorLight": {
+            "type": "String",
+            "required": true,
+            "comment": "['on','off']"
+          },
+          "voicePrompts": {
+            "type": "String",
+            "required": true,
+            "comment": "['on','off']"
+          },
+          "maxManualRecordTime": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Max manual recording time in minutes"
+          },
+          "nightVision": {
+            "type": "NightVision",
+            "required": true,
+            "comment": "['on','off','auto']"
+          },
+          "soundDetection": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Sound detection enabled"
+            },
+            "level": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Sound detection sensitivity [0-5]"
+            }
+          },
+          "motionDetection": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Motion detection enabled"
+            },
+            "level": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Motion detection sensitivity [0-4]"
+            }
+          },
+          "storage": {
+            "total": {
+              "type": "Integer",
+              "required": true,
+              "comment": "SD card total capacity (MB)"
+            },
+            "free": {
+              "type": "Integer",
+              "required": true,
+              "comment": "SD card free capacity (MB)"
+            },
+            "sdFormat": {
+              "type": "String",
+              "required": true,
+              "comment": "SD card format"
+            },
+            "rwMode": {
+              "type": "String",
+              "required": true,
+              "comment": "SD card read-write mode"
+            }
+          },
+          "soundEnable": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Sound enabled"
+          },
+          "privacyMode": {
+            "type": "String",
+            "required": true,
+            "comment": "['on','off']"
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Timezone"
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Alert",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "wifi": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is WiFi connected"
+            },
+            "ip": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi IP"
+            },
+            "mask": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi subnet mask"
+            },
+            "gateway": {
+              "type": "String",
+              "required": false,
+              "comment": "WiFi gateway"
+            },
+            "mac": {
+              "type": "String",
+              "required": false,
+              "comment": "WiFi MAC address"
+            },
+            "rssi": {
+              "type": "Integer",
+              "required": true,
+              "comment": "WiFi RSSI"
+            }
+          },
+          "volume": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Speaker volume [0-5]"
+          },
+          "recordMode": {
+            "type": "RecordMode",
+            "required": true,
+            "comment": "['full-time','alarm','off']"
+          },
+          "indicatorLight": {
+            "type": "String",
+            "required": true,
+            "comment": "['on','off']"
+          },
+          "voicePrompts": {
+            "type": "String",
+            "required": true,
+            "comment": "['on','off']"
+          },
+          "maxManualRecordTime": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Max manual recording time in minutes"
+          },
+          "nightVision": {
+            "type": "NightVision",
+            "required": true,
+            "comment": "['on','off','auto']"
+          },
+          "soundDetection": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Sound detection enabled"
+            },
+            "level": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Sound detection sensitivity [0-5]"
+            }
+          },
+          "motionDetection": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Motion detection enabled"
+            },
+            "level": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Motion detection sensitivity [0-4]"
+            }
+          },
+          "storage": {
+            "total": {
+              "type": "Integer",
+              "required": true,
+              "comment": "SD card total capacity (MB)"
+            },
+            "free": {
+              "type": "Integer",
+              "required": true,
+              "comment": "SD card free capacity (MB)"
+            },
+            "sdFormat": {
+              "type": "String",
+              "required": true,
+              "comment": "SD card format"
+            },
+            "rwMode": {
+              "type": "String",
+              "required": true,
+              "comment": "SD card read-write mode"
+            }
+          },
+          "soundEnable": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Sound enabled"
+          },
+          "privacyMode": {
+            "type": "String",
+            "required": true,
+            "comment": "['on','off']"
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Timezone"
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": false
+          }
+        }
+      }
+    }
+  ]
+}
