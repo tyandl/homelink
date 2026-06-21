@@ -1,6 +1,5 @@
 package types
 
-
 import (
 	"encoding/json"
 	"fmt"
@@ -10,36 +9,36 @@ type SwitchState string
 
 const (
 	SwitchStateClosed SwitchState = "closed"
-	SwitchStateOpen SwitchState = "open"
+	SwitchStateOpen   SwitchState = "open"
 )
 
 type SwitchCommand string
 
 const (
 	SwitchCommandClose SwitchCommand = "close"
-	SwitchCommandOpen SwitchCommand = "open"
+	SwitchCommandOpen  SwitchCommand = "open"
 )
 
 type AlarmState string
 
 const (
 	AlarmStateNormal AlarmState = "normal"
-	AlarmStateAlert AlarmState = "alert"
-	AlarmStateOff AlarmState = "off"
+	AlarmStateAlert  AlarmState = "alert"
+	AlarmStateOff    AlarmState = "off"
 )
 
 type LockState string
 
 const (
-	LockStateLocked LockState = "locked"
+	LockStateLocked   LockState = "locked"
 	LockStateUnlocked LockState = "unlocked"
 )
 
 type PowerSupply string
 
 const (
-	PowerSupplyBattery PowerSupply = "battery"
-	PowerSupplyUsb PowerSupply = "usb"
+	PowerSupplyBattery   PowerSupply = "battery"
+	PowerSupplyUsb       PowerSupply = "usb"
 	PowerSupplyPowerLine PowerSupply = "PowerLine"
 )
 
@@ -49,20 +48,20 @@ const (
 	ThermostatModeCool ThermostatMode = "cool"
 	ThermostatModeHeat ThermostatMode = "heat"
 	ThermostatModeAuto ThermostatMode = "auto"
-	ThermostatModeOff ThermostatMode = "off"
+	ThermostatModeOff  ThermostatMode = "off"
 )
 
 type FanMode string
 
 const (
-	FanModeOn FanMode = "on"
+	FanModeOn   FanMode = "on"
 	FanModeAuto FanMode = "auto"
 )
 
 type LatchSide string
 
 const (
-	LatchSideLeft LatchSide = "left"
+	LatchSideLeft  LatchSide = "left"
 	LatchSideRight LatchSide = "right"
 )
 
@@ -70,37 +69,37 @@ type DoorState string
 
 const (
 	DoorStateClosed DoorState = "closed"
-	DoorStateOpen DoorState = "open"
-	DoorStateError DoorState = "error"
+	DoorStateOpen   DoorState = "open"
+	DoorStateError  DoorState = "error"
 )
 
 type ScheduleType string
 
 const (
 	ScheduleTypeDisable ScheduleType = "disable"
-	ScheduleTypeWeekly ScheduleType = "weekly"
+	ScheduleTypeWeekly  ScheduleType = "weekly"
 	ScheduleTypeMonthly ScheduleType = "monthly"
 )
 
 type SprinklerMode string
 
 const (
-	SprinklerModeAuto SprinklerMode = "auto"
+	SprinklerModeAuto   SprinklerMode = "auto"
 	SprinklerModeManual SprinklerMode = "manual"
-	SprinklerModeOff SprinklerMode = "off"
+	SprinklerModeOff    SprinklerMode = "off"
 )
 
 type SprinklerCommand string
 
 const (
 	SprinklerCommandStart SprinklerCommand = "start"
-	SprinklerCommandStop SprinklerCommand = "stop"
+	SprinklerCommandStop  SprinklerCommand = "stop"
 )
 
 type WaterMode string
 
 const (
-	WaterModeManual WaterMode = "manual"
+	WaterModeManual   WaterMode = "manual"
 	WaterModeSchedule WaterMode = "schedule"
 )
 
@@ -108,7 +107,7 @@ type SprinklerWaterType string
 
 const (
 	SprinklerWaterTypeDuration SprinklerWaterType = "duration"
-	SprinklerWaterTypeAmount SprinklerWaterType = "amount"
+	SprinklerWaterTypeAmount   SprinklerWaterType = "amount"
 )
 
 type ThermostatRunning string
@@ -122,14 +121,14 @@ const (
 type ThermostatSchedule string
 
 const (
-	ThermostatScheduleRun ThermostatSchedule = "run"
+	ThermostatScheduleRun  ThermostatSchedule = "run"
 	ThermostatScheduleHold ThermostatSchedule = "hold"
 )
 
 type ThermostatMaster string
 
 const (
-	ThermostatMasterLocal ThermostatMaster = "local"
+	ThermostatMasterLocal   ThermostatMaster = "local"
 	ThermostatMasterSensor1 ThermostatMaster = "sensor1"
 	ThermostatMasterSensor2 ThermostatMaster = "sensor2"
 )
@@ -144,23 +143,23 @@ const (
 type LeakSensorSensitivity string
 
 const (
-	LeakSensorSensitivityLow LeakSensorSensitivity = "low"
+	LeakSensorSensitivityLow  LeakSensorSensitivity = "low"
 	LeakSensorSensitivityHigh LeakSensorSensitivity = "high"
 )
 
 type WaterLeakPlan string
 
 const (
-	WaterLeakPlanManual WaterLeakPlan = "Manual"
-	WaterLeakPlanAuto WaterLeakPlan = "Auto"
+	WaterLeakPlanManual   WaterLeakPlan = "Manual"
+	WaterLeakPlanAuto     WaterLeakPlan = "Auto"
 	WaterLeakPlanAwayAuto WaterLeakPlan = "AwayAuto"
 )
 
 type WaterMeterLeakPlan string
 
 const (
-	WaterMeterLeakPlanOn WaterMeterLeakPlan = "on"
-	WaterMeterLeakPlanOff WaterMeterLeakPlan = "off"
+	WaterMeterLeakPlanOn       WaterMeterLeakPlan = "on"
+	WaterMeterLeakPlanOff      WaterMeterLeakPlan = "off"
 	WaterMeterLeakPlanSchedule WaterMeterLeakPlan = "schedule"
 )
 
@@ -168,15 +167,15 @@ type RecordMode string
 
 const (
 	RecordModeFullTime RecordMode = "full-time"
-	RecordModeAlarm RecordMode = "alarm"
-	RecordModeOff RecordMode = "off"
+	RecordModeAlarm    RecordMode = "alarm"
+	RecordModeOff      RecordMode = "off"
 )
 
 type NightVision string
 
 const (
-	NightVisionOn NightVision = "on"
-	NightVisionOff NightVision = "off"
+	NightVisionOn   NightVision = "on"
+	NightVisionOff  NightVision = "off"
 	NightVisionAuto NightVision = "auto"
 )
 
@@ -184,16 +183,16 @@ type SpeakerTone string
 
 const (
 	SpeakerToneEmergency SpeakerTone = "Emergency"
-	SpeakerToneAlert SpeakerTone = "Alert"
-	SpeakerToneWarn SpeakerTone = "Warn"
-	SpeakerToneTip SpeakerTone = "Tip"
+	SpeakerToneAlert     SpeakerTone = "Alert"
+	SpeakerToneWarn      SpeakerTone = "Warn"
+	SpeakerToneTip       SpeakerTone = "Tip"
 )
 
 type LockCredentialType string
 
 const (
-	LockCredentialTypeOneTime LockCredentialType = "OneTime"
-	LockCredentialTypeRangeTime LockCredentialType = "RangeTime"
+	LockCredentialTypeOneTime    LockCredentialType = "OneTime"
+	LockCredentialTypeRangeTime  LockCredentialType = "RangeTime"
 	LockCredentialTypePeriodTime LockCredentialType = "PeriodTime"
 )
 
@@ -201,26 +200,26 @@ type LockCipherType string
 
 const (
 	LockCipherTypeFingerprint LockCipherType = "Fingerprint"
-	LockCipherTypeCard LockCipherType = "Card"
-	LockCipherTypeFob LockCipherType = "Fob"
-	LockCipherTypeCode LockCipherType = "Code"
+	LockCipherTypeCard        LockCipherType = "Card"
+	LockCipherTypeFob         LockCipherType = "Fob"
+	LockCipherTypeCode        LockCipherType = "Code"
 )
 
 type CellularRegState string
 
 const (
-	CellularRegStateNone CellularRegState = "none"
-	CellularRegStateRegistered CellularRegState = "registered"
+	CellularRegStateNone        CellularRegState = "none"
+	CellularRegStateRegistered  CellularRegState = "registered"
 	CellularRegStateRegistering CellularRegState = "registering"
-	CellularRegStateDenied CellularRegState = "denied"
-	CellularRegStateRoaming CellularRegState = "roaming"
-	CellularRegStateError CellularRegState = "error"
+	CellularRegStateDenied      CellularRegState = "denied"
+	CellularRegStateRoaming     CellularRegState = "roaming"
+	CellularRegStateError       CellularRegState = "error"
 )
 
 type SmartRemoterEventType string
 
 const (
-	SmartRemoterEventTypePress SmartRemoterEventType = "Press"
+	SmartRemoterEventTypePress     SmartRemoterEventType = "Press"
 	SmartRemoterEventTypeLongPress SmartRemoterEventType = "LongPress"
 )
 
@@ -228,10 +227,10 @@ type BatteryLevel string
 
 const (
 	BatteryLevelCritical BatteryLevel = "critical"
-	BatteryLevelLow BatteryLevel = "low"
-	BatteryLevelMedium BatteryLevel = "medium"
-	BatteryLevelHigh BatteryLevel = "high"
-	BatteryLevelFull BatteryLevel = "full"
+	BatteryLevelLow      BatteryLevel = "low"
+	BatteryLevelMedium   BatteryLevel = "medium"
+	BatteryLevelHigh     BatteryLevel = "high"
+	BatteryLevelFull     BatteryLevel = "full"
 )
 
 var batteryLevelValues = []BatteryLevel{
@@ -266,10 +265,10 @@ func (v BatteryLevel) MarshalJSON() ([]byte, error) {
 type BatteryState string
 
 const (
-	BatteryStateNone BatteryState = "none"
-	BatteryStatePowering BatteryState = "powering"
-	BatteryStateCharging BatteryState = "charging"
-	BatteryStateStandby BatteryState = "standby"
+	BatteryStateNone        BatteryState = "none"
+	BatteryStatePowering    BatteryState = "powering"
+	BatteryStateCharging    BatteryState = "charging"
+	BatteryStateStandby     BatteryState = "standby"
 	BatteryStateMaintenance BatteryState = "maintenance"
 )
 
@@ -305,10 +304,10 @@ func (v BatteryState) MarshalJSON() ([]byte, error) {
 type LockSoundLevel string
 
 const (
-	LockSoundLevelMute LockSoundLevel = "mute"
-	LockSoundLevelLow LockSoundLevel = "low"
+	LockSoundLevelMute   LockSoundLevel = "mute"
+	LockSoundLevelLow    LockSoundLevel = "low"
 	LockSoundLevelMedium LockSoundLevel = "medium"
-	LockSoundLevelHigh LockSoundLevel = "high"
+	LockSoundLevelHigh   LockSoundLevel = "high"
 )
 
 var lockSoundLevelValues = []LockSoundLevel{
@@ -344,8 +343,8 @@ type MeterUnit string
 const (
 	MeterUnitGAL MeterUnit = "GAL"
 	MeterUnitCCF MeterUnit = "CCF"
-	MeterUnitM3 MeterUnit = "M3"
-	MeterUnitL MeterUnit = "L"
+	MeterUnitM3  MeterUnit = "M3"
+	MeterUnitL   MeterUnit = "L"
 )
 
 var meterUnitValues = []MeterUnit{
@@ -380,7 +379,7 @@ type WaterTemperatureLevel string
 
 const (
 	WaterTemperatureLevelCold WaterTemperatureLevel = "cold"
-	WaterTemperatureLevelHot WaterTemperatureLevel = "hot"
+	WaterTemperatureLevelHot  WaterTemperatureLevel = "hot"
 )
 
 var waterTemperatureLevelValues = []WaterTemperatureLevel{
@@ -412,33 +411,33 @@ func (v WaterTemperatureLevel) MarshalJSON() ([]byte, error) {
 type ThermostatSwitch string
 
 const (
-	ThermostatSwitchOn ThermostatSwitch = "on"
+	ThermostatSwitchOn  ThermostatSwitch = "on"
 	ThermostatSwitchOff ThermostatSwitch = "off"
 )
 
 type SprinklerDaysType string
 
 const (
-	SprinklerDaysTypeWeekly SprinklerDaysType = "weekly"
-	SprinklerDaysTypeEvenDays SprinklerDaysType = "even_days"
-	SprinklerDaysTypeOddDays SprinklerDaysType = "odd_days"
+	SprinklerDaysTypeWeekly       SprinklerDaysType = "weekly"
+	SprinklerDaysTypeEvenDays     SprinklerDaysType = "even_days"
+	SprinklerDaysTypeOddDays      SprinklerDaysType = "odd_days"
 	SprinklerDaysTypeEveryFewDays SprinklerDaysType = "every_few_days"
 )
 
 type WiFiEncryption string
 
 const (
-	WiFiEncryptionNone WiFiEncryption = "none"
-	WiFiEncryptionWep WiFiEncryption = "wep"
-	WiFiEncryptionPsk WiFiEncryption = "psk"
-	WiFiEncryptionPsk2 WiFiEncryption = "psk2"
+	WiFiEncryptionNone     WiFiEncryption = "none"
+	WiFiEncryptionWep      WiFiEncryption = "wep"
+	WiFiEncryptionPsk      WiFiEncryption = "psk"
+	WiFiEncryptionPsk2     WiFiEncryption = "psk2"
 	WiFiEncryptionPskMixed WiFiEncryption = "psk-mixed"
-	WiFiEncryptionUnknown WiFiEncryption = "unknown"
+	WiFiEncryptionUnknown  WiFiEncryption = "unknown"
 )
 
 type AlertState string
 
 const (
-	AlertStateAlert AlertState = "alert"
+	AlertStateAlert  AlertState = "alert"
 	AlertStateNormal AlertState = "normal"
 )
