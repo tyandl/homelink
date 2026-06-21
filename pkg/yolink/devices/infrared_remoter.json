@@ -1,0 +1,354 @@
+{
+  "name": "InfraredRemoter",
+  "methods": [
+    {
+      "name": "getState",
+      "description": "Get Current InfraredRemoter State",
+      "request": {
+        "method": "getState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true,
+            "comment": "Battery level 1-4"
+          },
+          "keys": {
+            "type": "Boolean[64]",
+            "required": true,
+            "comment": "64 keys; true=learned"
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Timezone"
+          },
+          "time": {
+            "type": "Datetime",
+            "required": false,
+            "comment": "Last activity timestamp"
+          }
+        }
+      }
+    },
+    {
+      "name": "learn",
+      "description": "Learn IR code for a key",
+      "request": {
+        "method": "learn",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "key": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Key index [0-63]"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "success": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Learning result"
+          },
+          "errorCode": {
+            "type": "String",
+            "required": false,
+            "comment": "'error'|'keyError'|'started'|'timeout'"
+          }
+        }
+      }
+    },
+    {
+      "name": "send",
+      "description": "Send a learned IR code",
+      "request": {
+        "method": "send",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "key": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Key index [0-63]"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "success": {
+            "type": "Boolean",
+            "required": true
+          },
+          "errorCode": {
+            "type": "String",
+            "required": false,
+            "comment": "'notLearn'|'keyError'"
+          }
+        }
+      }
+    },
+    {
+      "name": "setTimeZone",
+      "description": "Set device timezone",
+      "request": {
+        "method": "setTimeZone",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "tz": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Timezone -12~+12"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "success": {
+            "type": "Boolean",
+            "required": true
+          },
+          "errorCode": {
+            "type": "String",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "setSchedule",
+      "description": "Create or update schedules (up to 10)",
+      "request": {
+        "method": "setSchedule",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "sches": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "isValid": {
+                "type": "Boolean",
+                "required": true,
+                "comment": "Schedule enabled"
+              },
+              "week": {
+                "type": "Integer",
+                "required": true,
+                "comment": "Weekday bitmask; bit 0-6 = Sun-Sat"
+              },
+              "time": {
+                "type": "String",
+                "required": true,
+                "comment": "HH:mm"
+              },
+              "key": {
+                "type": "Integer",
+                "required": true,
+                "comment": "Key to trigger [0-63]"
+              }
+            }
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "sches": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "isValid": {
+                "type": "Boolean",
+                "required": true
+              },
+              "week": {
+                "type": "Integer",
+                "required": true
+              },
+              "time": {
+                "type": "String",
+                "required": true
+              },
+              "key": {
+                "type": "Integer",
+                "required": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "getSchedules",
+      "description": "Get schedules",
+      "request": {
+        "method": "getSchedules",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "sches": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "isValid": {
+                "type": "Boolean",
+                "required": true
+              },
+              "week": {
+                "type": "Integer",
+                "required": true
+              },
+              "time": {
+                "type": "String",
+                "required": true
+              },
+              "key": {
+                "type": "Integer",
+                "required": true
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "Report",
+      "description": "Periodic infrared remoter state report",
+      "response": {
+        "data": {
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true
+          },
+          "keys": {
+            "type": "Boolean[64]",
+            "required": true,
+            "comment": "64-element array indicating which keys are programmed"
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "time": {
+            "type": "String",
+            "required": false,
+            "comment": "ISO 8601 datetime"
+          },
+          "tz": {
+            "type": "Integer",
+            "required": false
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Alert",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true,
+            "comment": "Battery level 1-4"
+          },
+          "keys": {
+            "type": "Boolean[64]",
+            "required": true,
+            "comment": "64 keys; true=learned"
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Timezone"
+          },
+          "time": {
+            "type": "Datetime",
+            "required": false,
+            "comment": "Last activity timestamp"
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": false
+          }
+        }
+      }
+    }
+  ]
+}

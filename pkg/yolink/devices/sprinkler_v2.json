@@ -1,0 +1,507 @@
+{
+  "name": "SprinklerV2",
+  "methods": [
+    {
+      "name": "getState",
+      "description": "Get Current State",
+      "request": {
+        "method": "getState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "running": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Current watering status"
+            },
+            "noWaterWhenRunning": {
+              "type": "Boolean",
+              "required": true
+            }
+          },
+          "waterMode": {
+            "type": "WaterMode",
+            "required": true,
+            "comment": "['manual','schedule']"
+          },
+          "attributes": {
+            "meterUnit": {
+              "type": "MeterUnit",
+              "required": true,
+              "comment": "0=GAL,1=CCF,2=M3,3=L"
+            },
+            "meterStepFactor": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Measurement accuracy"
+            },
+            "manualWater": {
+              "`type`": {
+                "type": "SprinklerWaterType",
+                "required": true,
+                "comment": "['duration','amount']"
+              },
+              "value": {
+                "type": "Integer",
+                "required": true
+              }
+            },
+            "waterDelay": {
+              "`type`": {
+                "type": "String",
+                "required": true,
+                "comment": "['manual']"
+              },
+              "duration": {
+                "type": "Integer",
+                "required": true,
+                "comment": "Delay minutes"
+              }
+            }
+          },
+          "running": {
+            "mode": {
+              "type": "WaterMode",
+              "required": true,
+              "comment": "['manual','schedule']"
+            },
+            "total": {
+              "`type`": {
+                "type": "SprinklerWaterType",
+                "required": true,
+                "comment": "['duration','amount']"
+              },
+              "value": {
+                "type": "Integer",
+                "required": true
+              }
+            },
+            "progress": {
+              "type": "Integer",
+              "required": true
+            }
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true,
+            "comment": "[0-4]"
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "name": "setState",
+      "description": "Set Sprinkler State",
+      "request": {
+        "method": "setState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "running": {
+            "type": "Boolean",
+            "required": false,
+            "comment": "Start/stop watering"
+          },
+          "waterMode": {
+            "type": "WaterMode",
+            "required": false,
+            "comment": "['schedule','manual']"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "running": {
+              "type": "Boolean",
+              "required": true
+            },
+            "noWaterWhenRunning": {
+              "type": "Boolean",
+              "required": true
+            }
+          },
+          "waterMode": {
+            "type": "WaterMode",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "name": "setAttributes",
+      "description": "Set Sprinkler attributes",
+      "request": {
+        "method": "setAttributes",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "manualWater": {
+            "`type`": {
+              "type": "SprinklerWaterType",
+              "required": false,
+              "comment": "['duration','amount']"
+            },
+            "value": {
+              "type": "Integer",
+              "required": false
+            }
+          },
+          "waterDelay": {
+            "`type`": {
+              "type": "String",
+              "required": false,
+              "comment": "['manual']"
+            },
+            "duration": {
+              "type": "Integer",
+              "required": false,
+              "comment": "Delay minutes"
+            }
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "attributes": {
+            "meterUnit": {
+              "type": "MeterUnit",
+              "required": true
+            },
+            "manualWater": {
+              "`type`": {
+                "type": "String",
+                "required": true
+              },
+              "value": {
+                "type": "Integer",
+                "required": true
+              }
+            },
+            "waterDelay": {
+              "`type`": {
+                "type": "String",
+                "required": true
+              },
+              "duration": {
+                "type": "Integer",
+                "required": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "getSchedules",
+      "description": "Get Schedule List (paginated)",
+      "request": {
+        "method": "getSchedules",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "offset": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Pagination offset"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "total": {
+            "type": "Integer",
+            "required": true
+          },
+          "count": {
+            "type": "Integer",
+            "required": true
+          },
+          "offset": {
+            "type": "Integer",
+            "required": true
+          },
+          "schedules": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "index": {
+                "type": "Integer",
+                "required": true
+              },
+              "startDate": {
+                "type": "String",
+                "required": true,
+                "comment": "M-d"
+              },
+              "endDate": {
+                "type": "String",
+                "required": true,
+                "comment": "M-d"
+              },
+              "time": {
+                "type": "String",
+                "required": true,
+                "comment": "h:m"
+              },
+              "waterDelay": {
+                "`type`": {
+                  "type": "SprinklerWaterType",
+                  "required": true,
+                  "comment": "['duration','amount']"
+                },
+                "value": {
+                  "type": "Integer",
+                  "required": true
+                }
+              },
+              "days": {
+                "`type`": {
+                  "type": "SprinklerDaysType",
+                  "required": true,
+                  "comment": "['weekly','even_days','odd_days','every_few_days']"
+                },
+                "value": {
+                  "type": "Integer",
+                  "required": true
+                }
+              },
+              "valid": {
+                "type": "Boolean",
+                "required": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "setSchedules",
+      "description": "Set Schedule",
+      "request": {
+        "method": "setSchedules",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "schedules": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "index": {
+                "type": "Integer",
+                "required": true
+              },
+              "startDate": {
+                "type": "String",
+                "required": true,
+                "comment": "M-d"
+              },
+              "endDate": {
+                "type": "String",
+                "required": true,
+                "comment": "M-d"
+              },
+              "time": {
+                "type": "String",
+                "required": true,
+                "comment": "h:m"
+              },
+              "waterDelay": {
+                "`type`": {
+                  "type": "String",
+                  "required": true
+                },
+                "value": {
+                  "type": "Integer",
+                  "required": true
+                }
+              },
+              "days": {
+                "`type`": {
+                  "type": "String",
+                  "required": true
+                },
+                "value": {
+                  "type": "Integer",
+                  "required": true
+                }
+              },
+              "valid": {
+                "type": "Boolean",
+                "required": true
+              }
+            }
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "total": {
+            "type": "Integer",
+            "required": true
+          },
+          "count": {
+            "type": "Integer",
+            "required": true
+          },
+          "offset": {
+            "type": "Integer",
+            "required": true
+          },
+          "schedules": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "index": {
+                "type": "Integer",
+                "required": true
+              },
+              "startDate": {
+                "type": "String",
+                "required": true,
+                "comment": "M-d"
+              },
+              "endDate": {
+                "type": "String",
+                "required": true,
+                "comment": "M-d"
+              },
+              "time": {
+                "type": "String",
+                "required": true,
+                "comment": "h:m"
+              },
+              "waterDelay": {
+                "`type`": {
+                  "type": "SprinklerWaterType",
+                  "required": true,
+                  "comment": "['duration','amount']"
+                },
+                "value": {
+                  "type": "Integer",
+                  "required": true
+                }
+              },
+              "days": {
+                "`type`": {
+                  "type": "SprinklerDaysType",
+                  "required": true,
+                  "comment": "['weekly','even_days','odd_days','every_few_days']"
+                },
+                "value": {
+                  "type": "Integer",
+                  "required": true
+                }
+              },
+              "valid": {
+                "type": "Boolean",
+                "required": true
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "Report",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "running": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Current watering status"
+          },
+          "noWaterWhenRunning": {
+            "type": "Boolean",
+            "required": true
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Alert",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "running": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Current watering status"
+          },
+          "noWaterWhenRunning": {
+            "type": "Boolean",
+            "required": true
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": false
+          }
+        }
+      }
+    }
+  ]
+}

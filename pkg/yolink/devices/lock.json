@@ -1,0 +1,544 @@
+{
+  "name": "Lock",
+  "methods": [
+    {
+      "name": "fetchState",
+      "description": "Fetch current status from cache",
+      "request": {
+        "method": "fetchState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "state": {
+              "type": "LockState",
+              "required": true,
+              "comment": "['locked','unlocked']"
+            },
+            "battery": {
+              "type": "BatteryLevel",
+              "required": true,
+              "comment": "Battery level 0-4"
+            }
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Timezone -12~12"
+          }
+        }
+      }
+    },
+    {
+      "name": "getState",
+      "description": "Get current status from device",
+      "request": {
+        "method": "getState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "type": "LockState",
+            "required": true,
+            "comment": "['locked','unlocked']"
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true,
+            "comment": "Battery level 0-4"
+          },
+          "rlSet": {
+            "type": "LatchSide",
+            "required": false,
+            "comment": "Latch orientation ['left','right']"
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "setState",
+      "description": "Lock or unlock the door (INFERRED: not officially part of the YoLink API; modeled after LockV2.setState and the observed Lock.setState report)",
+      "comment": "Inferred, not officially part of the YoLink API. Added to type the Lock.setState command echo reported over MQTT.",
+      "request": {
+        "method": "setState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "state": {
+            "type": "LockState",
+            "required": true,
+            "comment": "['locked','unlocked']"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "type": "LockState",
+            "required": true,
+            "comment": "['locked','unlocked']"
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "source": {
+            "type": "String",
+            "required": false,
+            "comment": "Origin of the change, e.g. 'app'"
+          }
+        }
+      }
+    },
+    {
+      "name": "listPasswords",
+      "description": "Get the list of passwords from the device",
+      "request": {
+        "method": "listPasswords",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "limit": {
+            "type": "Integer",
+            "required": true,
+            "comment": "List size max 10"
+          },
+          "offset": {
+            "type": "Integer",
+            "required": false,
+            "comment": "List offset default 0"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "offset": {
+            "type": "Integer",
+            "required": true
+          },
+          "limit": {
+            "type": "Integer",
+            "required": true
+          },
+          "total": {
+            "type": "Integer",
+            "required": true
+          },
+          "items": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "index": {
+                "type": "Integer",
+                "required": true,
+                "comment": "Password index"
+              },
+              "start": {
+                "type": "Datetime",
+                "required": true,
+                "comment": "Active from"
+              },
+              "end": {
+                "type": "Datetime",
+                "required": true,
+                "comment": "Expires at"
+              },
+              "pwd": {
+                "type": "String",
+                "required": true,
+                "comment": "Password"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "generateOTP",
+      "description": "Set a One Time Password",
+      "request": {
+        "method": "generateOTP",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "pwd": {
+            "type": "String",
+            "required": false,
+            "comment": "4-digit OTP matching /^\\d{4}$/"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "success": {
+            "type": "Boolean",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "name": "addPassword",
+      "description": "Set a new password to device",
+      "request": {
+        "method": "addPassword",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "pwd": {
+            "type": "String",
+            "required": true,
+            "comment": "4-8 digit password"
+          },
+          "start": {
+            "type": "Timestamp",
+            "required": true,
+            "comment": "Active from (ms)"
+          },
+          "end": {
+            "type": "Timestamp",
+            "required": true,
+            "comment": "Expires at (ms)"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "success": {
+            "type": "Boolean",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "name": "updatePassword",
+      "description": "Update an existing password in device",
+      "request": {
+        "method": "updatePassword",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "oldPwd": {
+            "type": "String|Number",
+            "required": true,
+            "comment": "Password or index to update"
+          },
+          "pwd": {
+            "type": "String",
+            "required": true,
+            "comment": "New 4-8 digit password"
+          },
+          "start": {
+            "type": "Timestamp",
+            "required": true,
+            "comment": "New active from (ms)"
+          },
+          "end": {
+            "type": "Timestamp",
+            "required": true,
+            "comment": "New expires at (ms)"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "success": {
+            "type": "Boolean",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "name": "delPassword",
+      "description": "Delete an existing password in device",
+      "request": {
+        "method": "delPassword",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "pwd": {
+            "type": "String|Number",
+            "required": true,
+            "comment": "Password or index to delete"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "success": {
+            "type": "Boolean",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "name": "clearPassword",
+      "description": "Clear all passwords in device",
+      "request": {
+        "method": "clearPassword",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "success": {
+            "type": "Boolean",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "name": "getVersion",
+      "description": "Get firmware info",
+      "request": {
+        "method": "getVersion",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Current version"
+          },
+          "newVersion": {
+            "versionId": {
+              "type": "String",
+              "required": false
+            },
+            "versionCode": {
+              "type": "String",
+              "required": false
+            },
+            "fileSize": {
+              "type": "String",
+              "required": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "startUpgrade",
+      "description": "Start firmware upgrade",
+      "request": {
+        "method": "startUpgrade",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "versionId": {
+            "type": "String",
+            "required": true,
+            "comment": "Version ID"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "isStarted": {
+            "type": "Boolean",
+            "required": true
+          }
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "StatusChange",
+      "description": "Fired when lock state changes",
+      "response": {
+        "data": {
+          "state": {
+            "type": "LockState",
+            "required": true
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true
+          },
+          "rlSet": {
+            "type": "String",
+            "required": false,
+            "comment": "right | left"
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Report",
+      "description": "Periodic lock state report",
+      "response": {
+        "data": {
+          "state": {
+            "type": "LockState",
+            "required": true
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true
+          },
+          "rlSet": {
+            "type": "String",
+            "required": false,
+            "comment": "right | left"
+          },
+          "tz": {
+            "type": "Integer",
+            "required": false
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Alert",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "state": {
+            "type": "LockState",
+            "required": true,
+            "comment": "['locked','unlocked']"
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true,
+            "comment": "Battery level 0-4"
+          },
+          "rlSet": {
+            "type": "LatchSide",
+            "required": false,
+            "comment": "Latch orientation ['left','right']"
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": false
+          }
+        }
+      }
+    }
+  ]
+}

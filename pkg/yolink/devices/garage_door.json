@@ -1,0 +1,24 @@
+{
+  "name": "GarageDoor",
+  "methods": [
+    {
+      "name": "toggle",
+      "description": "Toggle the garage door. Check DoorSensor state first before calling.",
+      "request": {
+        "method": "toggle",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {}
+    }
+  ],
+  "dispatch": "toggle"
+}

@@ -1,0 +1,590 @@
+{
+  "name": "WaterMeterController",
+  "methods": [
+    {
+      "name": "getState",
+      "description": "Get the state of Water Meter Controller",
+      "request": {
+        "method": "getState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "valve": {
+              "type": "SwitchCommand",
+              "required": true,
+              "comment": "['close','open']"
+            },
+            "meter": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Meter reading"
+            },
+            "waterFlowing": {
+              "type": "Boolean",
+              "required": true
+            }
+          },
+          "alarm": {
+            "openReminder": {
+              "type": "Boolean",
+              "required": true
+            },
+            "leak": {
+              "type": "Boolean",
+              "required": true
+            },
+            "amountOverrun": {
+              "type": "Boolean",
+              "required": true
+            },
+            "durationOverrun": {
+              "type": "Boolean",
+              "required": true
+            },
+            "valveError": {
+              "type": "Boolean",
+              "required": true
+            },
+            "reminder": {
+              "type": "Boolean",
+              "required": true
+            },
+            "freezeError": {
+              "type": "Boolean",
+              "required": true
+            }
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true,
+            "comment": "0-4"
+          },
+          "powerSupply": {
+            "type": "PowerSupply",
+            "required": true,
+            "comment": "['battery','PowerLine']"
+          },
+          "valveDelay": {
+            "on": {
+              "type": "Integer",
+              "required": false
+            },
+            "off": {
+              "type": "Integer",
+              "required": false
+            }
+          },
+          "attributes": {
+            "openReminder": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Open remind minutes"
+            },
+            "meterUnit": {
+              "type": "MeterUnit",
+              "required": true,
+              "comment": "0=GAL,1=CCF,2=M3,3=L"
+            },
+            "alertInterval": {
+              "type": "Integer",
+              "required": true
+            },
+            "meterStepFactor": {
+              "type": "Integer",
+              "required": true
+            },
+            "leakLimit": {
+              "type": "Float",
+              "required": true
+            },
+            "autoCloseValve": {
+              "type": "Boolean",
+              "required": true
+            },
+            "overrunAmountACV": {
+              "type": "Boolean",
+              "required": true
+            },
+            "overrunDurationACV": {
+              "type": "Boolean",
+              "required": true
+            },
+            "leakPlan": {
+              "type": "WaterMeterLeakPlan",
+              "required": true,
+              "comment": "['on','off','schedule']"
+            },
+            "overrunAmount": {
+              "type": "Float",
+              "required": true
+            },
+            "overrunDuration": {
+              "type": "Integer",
+              "required": true
+            },
+            "freezeTemp": {
+              "type": "Temperature",
+              "required": true
+            }
+          },
+          "recentUsage": {
+            "amount": {
+              "type": "Integer",
+              "required": true
+            },
+            "duration": {
+              "type": "Integer",
+              "required": true
+            }
+          },
+          "dailyUsage": {
+            "type": "Integer",
+            "required": true
+          },
+          "temperature": {
+            "type": "Temperature",
+            "required": true
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "name": "setState",
+      "description": "Set valve state",
+      "request": {
+        "method": "setState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "valve": {
+            "type": "SwitchCommand",
+            "required": true,
+            "comment": "['close','open']"
+          }
+        }
+      },
+      "response": {}
+    },
+    {
+      "name": "setMeterAttributes",
+      "description": "Set attributes for Water Meter Controller",
+      "request": {
+        "method": "setMeterAttributes",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "attributes": {
+            "openReminder": {
+              "type": "Integer",
+              "required": false
+            },
+            "meterUnit": {
+              "type": "MeterUnit",
+              "required": false,
+              "comment": "0=GAL,1=CCF,2=M3,3=L"
+            },
+            "alertInterval": {
+              "type": "Integer",
+              "required": false
+            },
+            "meterStepFactor": {
+              "type": "Integer",
+              "required": false
+            },
+            "leakLimit": {
+              "type": "Float",
+              "required": false
+            },
+            "autoCloseValve": {
+              "type": "Boolean",
+              "required": false
+            },
+            "overrunAmountACV": {
+              "type": "Boolean",
+              "required": false
+            },
+            "overrunDurationACV": {
+              "type": "Boolean",
+              "required": false
+            },
+            "leakPlan": {
+              "type": "WaterMeterLeakPlan",
+              "required": false,
+              "comment": "['on','off','schedule']"
+            },
+            "overrunAmount": {
+              "type": "Float",
+              "required": false
+            },
+            "overrunDuration": {
+              "type": "Integer",
+              "required": false
+            },
+            "freezeTemp": {
+              "type": "Temperature",
+              "required": false
+            }
+          }
+        }
+      },
+      "response": {}
+    },
+    {
+      "name": "getValveSchedules",
+      "description": "Get valve schedules",
+      "request": {
+        "method": "getValveSchedules",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "type": "Array",
+          "required": true,
+          "items": {
+            "isValid": {
+              "type": "Boolean",
+              "required": true
+            },
+            "index": {
+              "type": "Integer",
+              "required": true
+            },
+            "on": {
+              "type": "String",
+              "required": false,
+              "comment": "HH:mm"
+            },
+            "off": {
+              "type": "String",
+              "required": false,
+              "comment": "HH:mm"
+            },
+            "week": {
+              "type": "Integer",
+              "required": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "setValveSchedules",
+      "description": "Set valve schedules (index 0-5)",
+      "request": {
+        "method": "setValveSchedules",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "sches": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "isValid": {
+                "type": "Boolean",
+                "required": true
+              },
+              "index": {
+                "type": "Integer",
+                "required": true
+              },
+              "on": {
+                "type": "String",
+                "required": true,
+                "comment": "HH:mm"
+              },
+              "off": {
+                "type": "String",
+                "required": true,
+                "comment": "HH:mm"
+              },
+              "week": {
+                "type": "Integer",
+                "required": true
+              }
+            }
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "type": "Array",
+          "required": true,
+          "items": {
+            "isValid": {
+              "type": "Boolean",
+              "required": true
+            },
+            "index": {
+              "type": "Integer",
+              "required": true
+            },
+            "on": {
+              "type": "String",
+              "required": false,
+              "comment": "HH:mm"
+            },
+            "off": {
+              "type": "String",
+              "required": false,
+              "comment": "HH:mm"
+            },
+            "week": {
+              "type": "Integer",
+              "required": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "getLeakSchedules",
+      "description": "Get leak schedules",
+      "request": {
+        "method": "getLeakSchedules",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "type": "Array",
+          "required": true,
+          "items": {
+            "isValid": {
+              "type": "Boolean",
+              "required": true
+            },
+            "index": {
+              "type": "Integer",
+              "required": true
+            },
+            "on": {
+              "type": "String",
+              "required": false,
+              "comment": "HH:mm"
+            },
+            "off": {
+              "type": "String",
+              "required": false,
+              "comment": "HH:mm"
+            },
+            "week": {
+              "type": "Integer",
+              "required": true
+            },
+            "leakLimit": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Leak limit in meter unit"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "setLeakSchedules",
+      "description": "Set leak schedules (index 0-5)",
+      "request": {
+        "method": "setLeakSchedules",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "sches": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "isValid": {
+                "type": "Boolean",
+                "required": true
+              },
+              "index": {
+                "type": "Integer",
+                "required": true
+              },
+              "on": {
+                "type": "String",
+                "required": true,
+                "comment": "HH:mm"
+              },
+              "off": {
+                "type": "String",
+                "required": true,
+                "comment": "HH:mm"
+              },
+              "week": {
+                "type": "Integer",
+                "required": true
+              },
+              "leakLimit": {
+                "type": "Integer",
+                "required": false
+              }
+            }
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "type": "Array",
+          "required": true,
+          "items": {
+            "isValid": {
+              "type": "Boolean",
+              "required": true
+            },
+            "index": {
+              "type": "Integer",
+              "required": true
+            },
+            "on": {
+              "type": "String",
+              "required": false,
+              "comment": "HH:mm"
+            },
+            "off": {
+              "type": "String",
+              "required": false,
+              "comment": "HH:mm"
+            },
+            "week": {
+              "type": "Integer",
+              "required": true
+            },
+            "leakLimit": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Leak limit in meter unit"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "Report",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "valve": {
+            "type": "SwitchCommand",
+            "required": true,
+            "comment": "['close','open']"
+          },
+          "meter": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Meter reading"
+          },
+          "waterFlowing": {
+            "type": "Boolean",
+            "required": true
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Alert",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "valve": {
+            "type": "SwitchCommand",
+            "required": true,
+            "comment": "['close','open']"
+          },
+          "meter": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Meter reading"
+          },
+          "waterFlowing": {
+            "type": "Boolean",
+            "required": true
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": false
+          }
+        }
+      }
+    }
+  ]
+}

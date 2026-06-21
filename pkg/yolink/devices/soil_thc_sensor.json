@@ -1,0 +1,485 @@
+{
+  "name": "SoilThcSensor",
+  "methods": [
+    {
+      "name": "getState",
+      "description": "Get Soil Temperature, Humidity & Conductivity Sensor's State",
+      "request": {
+        "method": "getState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "online": {
+            "type": "Boolean",
+            "required": true
+          },
+          "state": {
+            "alarm": {
+              "lowTemp": {
+                "type": "Boolean",
+                "required": true
+              },
+              "highTemp": {
+                "type": "Boolean",
+                "required": true
+              },
+              "lowHumidity": {
+                "type": "Boolean",
+                "required": true
+              },
+              "highHumidity": {
+                "type": "Boolean",
+                "required": true
+              },
+              "lowConductivity": {
+                "type": "Boolean",
+                "required": true
+              },
+              "highConductivity": {
+                "type": "Boolean",
+                "required": true
+              },
+              "period": {
+                "type": "Boolean",
+                "required": true
+              }
+            },
+            "state": {
+              "temperature": {
+                "type": "Temperature",
+                "required": true,
+                "comment": "Current temperature"
+              },
+              "humidity": {
+                "type": "Float",
+                "required": true,
+                "comment": "Current humidity"
+              },
+              "conductivity": {
+                "type": "Float",
+                "required": true,
+                "comment": "Current conductivity \u00b5S/cm"
+              }
+            },
+            "attributes": {
+              "alertInterval": {
+                "type": "Integer",
+                "required": true
+              },
+              "reportInterval": {
+                "type": "Integer",
+                "required": true
+              },
+              "tempLimit": {
+                "max": {
+                  "type": "Float",
+                  "required": true
+                },
+                "min": {
+                  "type": "Float",
+                  "required": true
+                }
+              },
+              "humidityLimit": {
+                "max": {
+                  "type": "Float",
+                  "required": true
+                },
+                "min": {
+                  "type": "Float",
+                  "required": true
+                }
+              },
+              "conductivityLimit": {
+                "max": {
+                  "type": "Float",
+                  "required": true
+                },
+                "min": {
+                  "type": "Float",
+                  "required": true
+                }
+              }
+            },
+            "tz": {
+              "type": "Integer",
+              "required": true
+            },
+            "battery": {
+              "type": "BatteryLevel",
+              "required": true,
+              "comment": "0-4"
+            },
+            "version": {
+              "type": "String",
+              "required": true
+            }
+          },
+          "reportAt": {
+            "type": "Datetime",
+            "required": true
+          },
+          "deviceId": {
+            "type": "String",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "name": "getActivityLogs",
+      "description": "Retrieve device activity records. Requires DEVICE.HISTORICAL_DATA.READ permission.",
+      "request": {
+        "method": "getActivityLogs",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "search": {
+            "startDate": {
+              "type": "String",
+              "required": false,
+              "comment": "YYYY-MM-DD"
+            },
+            "endDate": {
+              "type": "String",
+              "required": false,
+              "comment": "YYYY-MM-DD"
+            }
+          },
+          "retrievalKey": {
+            "type": "String",
+            "required": false
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "logs": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "id": {
+                "type": "String",
+                "required": true
+              },
+              "time": {
+                "type": "Date",
+                "required": true
+              },
+              "data": {
+                "type": "Object",
+                "required": true
+              }
+            }
+          },
+          "retrievalKeys": {
+            "next": {
+              "type": "Object",
+              "required": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "getMetricsLogs",
+      "description": "Retrieve device metrics logs. Requires DEVICE.HISTORICAL_DATA.READ permission.",
+      "request": {
+        "method": "getMetricsLogs",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "search": {
+            "startDate": {
+              "type": "String",
+              "required": false,
+              "comment": "YYYY-MM-DD"
+            },
+            "endDate": {
+              "type": "String",
+              "required": false,
+              "comment": "YYYY-MM-DD"
+            }
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "logs": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "time": {
+                "type": "Date",
+                "required": true
+              },
+              "*": {
+                "type": "Number",
+                "required": true,
+                "comment": "Metric values"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "Report",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "alarm": {
+            "lowTemp": {
+              "type": "Boolean",
+              "required": true
+            },
+            "highTemp": {
+              "type": "Boolean",
+              "required": true
+            },
+            "lowHumidity": {
+              "type": "Boolean",
+              "required": true
+            },
+            "highHumidity": {
+              "type": "Boolean",
+              "required": true
+            },
+            "lowConductivity": {
+              "type": "Boolean",
+              "required": true
+            },
+            "highConductivity": {
+              "type": "Boolean",
+              "required": true
+            },
+            "period": {
+              "type": "Boolean",
+              "required": true
+            }
+          },
+          "state": {
+            "temperature": {
+              "type": "Temperature",
+              "required": true,
+              "comment": "Current temperature"
+            },
+            "humidity": {
+              "type": "Float",
+              "required": true,
+              "comment": "Current humidity"
+            },
+            "conductivity": {
+              "type": "Float",
+              "required": true,
+              "comment": "Current conductivity \u00b5S/cm"
+            }
+          },
+          "attributes": {
+            "alertInterval": {
+              "type": "Integer",
+              "required": true
+            },
+            "reportInterval": {
+              "type": "Integer",
+              "required": true
+            },
+            "tempLimit": {
+              "max": {
+                "type": "Float",
+                "required": true
+              },
+              "min": {
+                "type": "Float",
+                "required": true
+              }
+            },
+            "humidityLimit": {
+              "max": {
+                "type": "Float",
+                "required": true
+              },
+              "min": {
+                "type": "Float",
+                "required": true
+              }
+            },
+            "conductivityLimit": {
+              "max": {
+                "type": "Float",
+                "required": true
+              },
+              "min": {
+                "type": "Float",
+                "required": true
+              }
+            }
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true,
+            "comment": "0-4"
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Alert",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "alarm": {
+            "lowTemp": {
+              "type": "Boolean",
+              "required": true
+            },
+            "highTemp": {
+              "type": "Boolean",
+              "required": true
+            },
+            "lowHumidity": {
+              "type": "Boolean",
+              "required": true
+            },
+            "highHumidity": {
+              "type": "Boolean",
+              "required": true
+            },
+            "lowConductivity": {
+              "type": "Boolean",
+              "required": true
+            },
+            "highConductivity": {
+              "type": "Boolean",
+              "required": true
+            },
+            "period": {
+              "type": "Boolean",
+              "required": true
+            }
+          },
+          "state": {
+            "temperature": {
+              "type": "Temperature",
+              "required": true,
+              "comment": "Current temperature"
+            },
+            "humidity": {
+              "type": "Float",
+              "required": true,
+              "comment": "Current humidity"
+            },
+            "conductivity": {
+              "type": "Float",
+              "required": true,
+              "comment": "Current conductivity \u00b5S/cm"
+            }
+          },
+          "attributes": {
+            "alertInterval": {
+              "type": "Integer",
+              "required": true
+            },
+            "reportInterval": {
+              "type": "Integer",
+              "required": true
+            },
+            "tempLimit": {
+              "max": {
+                "type": "Float",
+                "required": true
+              },
+              "min": {
+                "type": "Float",
+                "required": true
+              }
+            },
+            "humidityLimit": {
+              "max": {
+                "type": "Float",
+                "required": true
+              },
+              "min": {
+                "type": "Float",
+                "required": true
+              }
+            },
+            "conductivityLimit": {
+              "max": {
+                "type": "Float",
+                "required": true
+              },
+              "min": {
+                "type": "Float",
+                "required": true
+              }
+            }
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true,
+            "comment": "0-4"
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": false
+          }
+        }
+      }
+    }
+  ]
+}

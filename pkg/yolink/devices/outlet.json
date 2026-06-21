@@ -1,0 +1,484 @@
+{
+  "name": "Outlet",
+  "methods": [
+    {
+      "name": "getState",
+      "description": "Get Current State",
+      "request": {
+        "method": "getState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "type": "SwitchState",
+            "required": true,
+            "comment": "['closed','open']"
+          },
+          "delay": {
+            "on": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Remain Delay ON minutes"
+            },
+            "off": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Remain Delay OFF minutes"
+            }
+          },
+          "power": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Current power (0 if unsupported)"
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "name": "setState",
+      "description": "Set Outlet's State",
+      "request": {
+        "method": "setState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "state": {
+            "type": "SwitchCommand",
+            "required": true,
+            "comment": "['close','open']"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "type": "SwitchState",
+            "required": true,
+            "comment": "['closed','open']"
+          }
+        }
+      }
+    },
+    {
+      "name": "setDelay",
+      "description": "Delay to turn on/off outlet",
+      "request": {
+        "method": "setDelay",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "delayOn": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Delay ON minutes; 0=cancel"
+          },
+          "delayOff": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Delay OFF minutes; 0=cancel"
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "delay": {
+            "on": {
+              "type": "Integer",
+              "required": true
+            },
+            "off": {
+              "type": "Integer",
+              "required": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "getSchedules",
+      "description": "Get Schedule List",
+      "request": {
+        "method": "getSchedules",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "type": "Array",
+          "required": true,
+          "items": {
+            "isValid": {
+              "type": "Boolean",
+              "required": true
+            },
+            "index": {
+              "type": "Integer",
+              "required": true
+            },
+            "on": {
+              "type": "String",
+              "required": false,
+              "comment": "HH:mm"
+            },
+            "off": {
+              "type": "String",
+              "required": false,
+              "comment": "HH:mm"
+            },
+            "week": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Weekday mask"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "setSchedules",
+      "description": "Set Schedule (index 0-5)",
+      "request": {
+        "method": "setSchedules",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "sches": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "isValid": {
+                "type": "Boolean",
+                "required": true
+              },
+              "index": {
+                "type": "Integer",
+                "required": true
+              },
+              "on": {
+                "type": "String",
+                "required": true,
+                "comment": "HH:mm"
+              },
+              "off": {
+                "type": "String",
+                "required": true,
+                "comment": "HH:mm"
+              },
+              "week": {
+                "type": "Integer",
+                "required": true,
+                "comment": "Weekday mask"
+              }
+            }
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "type": "Array",
+          "required": true,
+          "items": {
+            "isValid": {
+              "type": "Boolean",
+              "required": true
+            },
+            "index": {
+              "type": "Integer",
+              "required": true
+            },
+            "on": {
+              "type": "String",
+              "required": false,
+              "comment": "HH:mm"
+            },
+            "off": {
+              "type": "String",
+              "required": false,
+              "comment": "HH:mm"
+            },
+            "week": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Weekday mask"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "getVersion",
+      "description": "Get firmware info",
+      "request": {
+        "method": "getVersion",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "newVersion": {
+            "versionId": {
+              "type": "String",
+              "required": false
+            },
+            "versionCode": {
+              "type": "String",
+              "required": false
+            },
+            "fileSize": {
+              "type": "String",
+              "required": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "startUpgrade",
+      "description": "Start firmware upgrade",
+      "request": {
+        "method": "startUpgrade",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "versionId": {
+            "type": "String",
+            "required": true
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "isStarted": {
+            "type": "Boolean",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "name": "getActivityLogs",
+      "description": "Retrieve device activity records. Requires DEVICE.HISTORICAL_DATA.READ permission.",
+      "request": {
+        "method": "getActivityLogs",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "search": {
+            "startDate": {
+              "type": "String",
+              "required": false,
+              "comment": "YYYY-MM-DD"
+            },
+            "endDate": {
+              "type": "String",
+              "required": false,
+              "comment": "YYYY-MM-DD"
+            }
+          },
+          "retrievalKey": {
+            "type": "String",
+            "required": false
+          }
+        }
+      },
+      "response": {
+        "data": {
+          "logs": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "id": {
+                "type": "String",
+                "required": true
+              },
+              "time": {
+                "type": "Date",
+                "required": true
+              },
+              "data": {
+                "type": "Object",
+                "required": true
+              }
+            }
+          },
+          "retrievalKeys": {
+            "next": {
+              "type": "Object",
+              "required": false
+            }
+          }
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "Report",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "state": {
+            "type": "SwitchState",
+            "required": true,
+            "comment": "['closed','open']"
+          },
+          "delay": {
+            "on": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Remain Delay ON minutes"
+            },
+            "off": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Remain Delay OFF minutes"
+            }
+          },
+          "power": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Current power (0 if unsupported)"
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Alert",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "state": {
+            "type": "SwitchState",
+            "required": true,
+            "comment": "['closed','open']"
+          },
+          "delay": {
+            "on": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Remain Delay ON minutes"
+            },
+            "off": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Remain Delay OFF minutes"
+            }
+          },
+          "power": {
+            "type": "Integer",
+            "required": false,
+            "comment": "Current power (0 if unsupported)"
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "tz": {
+            "type": "Integer",
+            "required": true
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": false
+          }
+        }
+      }
+    }
+  ]
+}

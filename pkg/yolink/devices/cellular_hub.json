@@ -1,0 +1,549 @@
+{
+  "name": "CellularHub",
+  "methods": [
+    {
+      "name": "getState",
+      "description": "Get Hub's State including WiFi, Ethernet, and cellular network info",
+      "request": {
+        "method": "getState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Hub version"
+          },
+          "wifi": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is WiFi connected"
+            },
+            "ssid": {
+              "type": "String",
+              "required": true,
+              "comment": "Current WiFi SSID"
+            },
+            "ip": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi IP"
+            },
+            "gateway": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi gateway"
+            },
+            "mask": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi subnet mask"
+            }
+          },
+          "eth": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is Ethernet connected"
+            },
+            "ip": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet IP"
+            },
+            "gateway": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet gateway"
+            },
+            "mask": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet subnet mask"
+            }
+          },
+          "cellular": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is cellular network connected"
+            },
+            "module": {
+              "enable": {
+                "type": "Boolean",
+                "required": true,
+                "comment": "Is cellular module running"
+              },
+              "mfr": {
+                "type": "String",
+                "required": false,
+                "comment": "Cellular module manufacturer"
+              },
+              "model": {
+                "type": "String",
+                "required": false,
+                "comment": "Cellular module model"
+              },
+              "ver": {
+                "type": "String",
+                "required": false,
+                "comment": "Cellular module firmware version"
+              },
+              "imei": {
+                "type": "String",
+                "required": false,
+                "comment": "Cellular module IMEI"
+              }
+            },
+            "iccid": {
+              "type": "String",
+              "required": true,
+              "comment": "Current SIM card ICCID; empty = no SIM"
+            },
+            "apn": {
+              "type": "String",
+              "required": true,
+              "comment": "Current APN; empty = no APN used"
+            },
+            "regState": {
+              "type": "CellularRegState",
+              "required": true,
+              "comment": "Registration state ['none','registered','registering','denied','roaming','error']"
+            },
+            "regStateCode": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Raw registration code from cellular module"
+            },
+            "rssi": {
+              "type": "Integer",
+              "required": true,
+              "comment": "RSSI; 99=unknown or undetectable"
+            }
+          },
+          "other": {
+            "power": {
+              "dc": {
+                "type": "Boolean",
+                "required": true,
+                "comment": "DC power supply connected"
+              },
+              "battery": {
+                "type": "Boolean",
+                "required": true,
+                "comment": "Battery connected"
+              },
+              "batteryState": {
+                "type": "BatteryState",
+                "required": true,
+                "comment": "Battery state: 0=none,1=powering,2=charging,3=standby,4=maintenance"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "scanWiFiList",
+      "description": "Search for available WiFi APs. Use a timeout >8 seconds when calling.",
+      "request": {
+        "method": "scanWiFiList",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "wifiList": {
+            "type": "Array",
+            "required": true,
+            "items": {
+              "ssid": {
+                "type": "String",
+                "required": true,
+                "comment": "AP ESSID"
+              },
+              "rssi": {
+                "type": "String",
+                "required": true,
+                "comment": "AP RSSI"
+              },
+              "encryption": {
+                "type": "WiFiEncryption",
+                "required": true,
+                "comment": "Encryption type ['none','wep','psk','psk2','psk-mixed','unknown']"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "setWiFi",
+      "description": "Set hub's WiFi info (when online)",
+      "request": {
+        "method": "setWiFi",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        },
+        "params": {
+          "ssid": {
+            "type": "String",
+            "required": true,
+            "comment": "WiFi SSID"
+          },
+          "password": {
+            "type": "String",
+            "required": true,
+            "comment": "WiFi password"
+          },
+          "encryption": {
+            "type": "String",
+            "required": true,
+            "comment": "Encryption type"
+          }
+        }
+      },
+      "response": {}
+    },
+    {
+      "name": "resetCellular",
+      "description": "Reset cellular module",
+      "request": {
+        "method": "resetCellular",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {}
+    }
+  ],
+  "events": [
+    {
+      "name": "Report",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Hub version"
+          },
+          "wifi": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is WiFi connected"
+            },
+            "ssid": {
+              "type": "String",
+              "required": true,
+              "comment": "Current WiFi SSID"
+            },
+            "ip": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi IP"
+            },
+            "gateway": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi gateway"
+            },
+            "mask": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi subnet mask"
+            }
+          },
+          "eth": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is Ethernet connected"
+            },
+            "ip": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet IP"
+            },
+            "gateway": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet gateway"
+            },
+            "mask": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet subnet mask"
+            }
+          },
+          "cellular": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is cellular network connected"
+            },
+            "module": {
+              "enable": {
+                "type": "Boolean",
+                "required": true,
+                "comment": "Is cellular module running"
+              },
+              "mfr": {
+                "type": "String",
+                "required": false,
+                "comment": "Cellular module manufacturer"
+              },
+              "model": {
+                "type": "String",
+                "required": false,
+                "comment": "Cellular module model"
+              },
+              "ver": {
+                "type": "String",
+                "required": false,
+                "comment": "Cellular module firmware version"
+              },
+              "imei": {
+                "type": "String",
+                "required": false,
+                "comment": "Cellular module IMEI"
+              }
+            },
+            "iccid": {
+              "type": "String",
+              "required": true,
+              "comment": "Current SIM card ICCID; empty = no SIM"
+            },
+            "apn": {
+              "type": "String",
+              "required": true,
+              "comment": "Current APN; empty = no APN used"
+            },
+            "regState": {
+              "type": "CellularRegState",
+              "required": true,
+              "comment": "Registration state ['none','registered','registering','denied','roaming','error']"
+            },
+            "regStateCode": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Raw registration code from cellular module"
+            },
+            "rssi": {
+              "type": "Integer",
+              "required": true,
+              "comment": "RSSI; 99=unknown or undetectable"
+            }
+          },
+          "other": {
+            "power": {
+              "dc": {
+                "type": "Boolean",
+                "required": true,
+                "comment": "DC power supply connected"
+              },
+              "battery": {
+                "type": "Boolean",
+                "required": true,
+                "comment": "Battery connected"
+              },
+              "batteryState": {
+                "type": "BatteryState",
+                "required": true,
+                "comment": "Battery state: 0=none,1=powering,2=charging,3=standby,4=maintenance"
+              }
+            }
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Alert",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Hub version"
+          },
+          "wifi": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is WiFi connected"
+            },
+            "ssid": {
+              "type": "String",
+              "required": true,
+              "comment": "Current WiFi SSID"
+            },
+            "ip": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi IP"
+            },
+            "gateway": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi gateway"
+            },
+            "mask": {
+              "type": "String",
+              "required": true,
+              "comment": "WiFi subnet mask"
+            }
+          },
+          "eth": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is Ethernet connected"
+            },
+            "ip": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet IP"
+            },
+            "gateway": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet gateway"
+            },
+            "mask": {
+              "type": "String",
+              "required": true,
+              "comment": "Ethernet subnet mask"
+            }
+          },
+          "cellular": {
+            "enable": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is cellular network connected"
+            },
+            "module": {
+              "enable": {
+                "type": "Boolean",
+                "required": true,
+                "comment": "Is cellular module running"
+              },
+              "mfr": {
+                "type": "String",
+                "required": false,
+                "comment": "Cellular module manufacturer"
+              },
+              "model": {
+                "type": "String",
+                "required": false,
+                "comment": "Cellular module model"
+              },
+              "ver": {
+                "type": "String",
+                "required": false,
+                "comment": "Cellular module firmware version"
+              },
+              "imei": {
+                "type": "String",
+                "required": false,
+                "comment": "Cellular module IMEI"
+              }
+            },
+            "iccid": {
+              "type": "String",
+              "required": true,
+              "comment": "Current SIM card ICCID; empty = no SIM"
+            },
+            "apn": {
+              "type": "String",
+              "required": true,
+              "comment": "Current APN; empty = no APN used"
+            },
+            "regState": {
+              "type": "CellularRegState",
+              "required": true,
+              "comment": "Registration state ['none','registered','registering','denied','roaming','error']"
+            },
+            "regStateCode": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Raw registration code from cellular module"
+            },
+            "rssi": {
+              "type": "Integer",
+              "required": true,
+              "comment": "RSSI; 99=unknown or undetectable"
+            }
+          },
+          "other": {
+            "power": {
+              "dc": {
+                "type": "Boolean",
+                "required": true,
+                "comment": "DC power supply connected"
+              },
+              "battery": {
+                "type": "Boolean",
+                "required": true,
+                "comment": "Battery connected"
+              },
+              "batteryState": {
+                "type": "BatteryState",
+                "required": true,
+                "comment": "Battery state: 0=none,1=powering,2=charging,3=standby,4=maintenance"
+              }
+            }
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": false
+          }
+        }
+      }
+    }
+  ]
+}

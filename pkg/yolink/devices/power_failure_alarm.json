@@ -1,0 +1,228 @@
+{
+  "name": "PowerFailureAlarm",
+  "methods": [
+    {
+      "name": "getState",
+      "description": "Get last reported state of Power Failure Alarm",
+      "request": {
+        "method": "getState",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {
+        "data": {
+          "state": {
+            "state": {
+              "type": "AlarmState",
+              "required": false,
+              "comment": "['normal','alert','off']"
+            },
+            "alertType": {
+              "type": "String",
+              "required": false,
+              "comment": "Alert type"
+            },
+            "sound": {
+              "type": "Integer",
+              "required": true,
+              "comment": "Sound level"
+            },
+            "battery": {
+              "type": "BatteryLevel",
+              "required": true,
+              "comment": "Battery level 0-4"
+            },
+            "powerSupply": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is power supply connected"
+            },
+            "beep": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Beep enabled"
+            },
+            "mute": {
+              "type": "Boolean",
+              "required": true,
+              "comment": "Is in mute mode"
+            },
+            "version": {
+              "type": "String",
+              "required": true,
+              "comment": "Firmware version"
+            }
+          },
+          "reportAt": {
+            "type": "Datetime",
+            "required": true
+          },
+          "deviceId": {
+            "type": "String",
+            "required": true
+          }
+        }
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "Report",
+      "description": "Periodic power failure alarm state report",
+      "response": {
+        "data": {
+          "state": {
+            "type": "AlarmState",
+            "required": true
+          },
+          "sound": {
+            "type": "Integer",
+            "required": true
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true
+          },
+          "powerSupply": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "true = AC power present"
+          },
+          "alertDuration": {
+            "type": "Integer",
+            "required": true
+          },
+          "alertInterval": {
+            "type": "Integer",
+            "required": true
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "mute": {
+            "type": "Boolean",
+            "required": true
+          },
+          "loraP2PHash": {
+            "type": "Integer",
+            "required": false
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "StatusChange",
+      "response": {
+        "data": {
+          "state": {
+            "type": "AlarmState",
+            "required": true
+          },
+          "sound": {
+            "type": "Integer",
+            "required": true
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true
+          },
+          "powerSupply": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "true = AC power present"
+          },
+          "alertDuration": {
+            "type": "Integer",
+            "required": true
+          },
+          "alertInterval": {
+            "type": "Integer",
+            "required": true
+          },
+          "version": {
+            "type": "String",
+            "required": true
+          },
+          "mute": {
+            "type": "Boolean",
+            "required": true
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Alert",
+      "note": "inferred from getState \u2014 not tested against live device",
+      "inferred": true,
+      "response": {
+        "data": {
+          "state": {
+            "type": "AlarmState",
+            "required": false,
+            "comment": "['normal','alert','off']"
+          },
+          "alertType": {
+            "type": "String",
+            "required": false,
+            "comment": "Alert type"
+          },
+          "sound": {
+            "type": "Integer",
+            "required": true,
+            "comment": "Sound level"
+          },
+          "battery": {
+            "type": "BatteryLevel",
+            "required": true,
+            "comment": "Battery level 0-4"
+          },
+          "powerSupply": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Is power supply connected"
+          },
+          "beep": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Beep enabled"
+          },
+          "mute": {
+            "type": "Boolean",
+            "required": true,
+            "comment": "Is in mute mode"
+          },
+          "version": {
+            "type": "String",
+            "required": true,
+            "comment": "Firmware version"
+          },
+          "loraInfo": {
+            "type": "LoraInfo",
+            "required": false
+          },
+          "stateChangedAt": {
+            "type": "Timestamp",
+            "required": false
+          }
+        }
+      }
+    }
+  ]
+}

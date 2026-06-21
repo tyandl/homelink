@@ -1,0 +1,24 @@
+{
+  "name": "Finger",
+  "methods": [
+    {
+      "name": "toggle",
+      "description": "Let finger press once. Check DoorSensor state first before calling.",
+      "request": {
+        "method": "toggle",
+        "targetDevice": {
+          "type": "String",
+          "required": true,
+          "comment": "DeviceId"
+        },
+        "token": {
+          "type": "String",
+          "required": true,
+          "comment": "Net token"
+        }
+      },
+      "response": {}
+    }
+  ],
+  "dispatch": "toggle"
+}
