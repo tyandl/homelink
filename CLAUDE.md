@@ -9,13 +9,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 go build ./...
 
 # Run the main binary (requires env vars)
-yolink_client_id=<id> yolink_client_secret=<secret> go run ./cmd/homelink
+yolink_client_id=<id> yolink_client_secret=<secret> go run ./cmd/yolink
 
 # Test
 go test ./...
 
 # Run a single test
-go test ./cmd/homelink/... -run TestGetPhrase
+go test ./cmd/yolink/... -run TestGetPhrase
 ```
 
 ## Architecture
@@ -24,7 +24,7 @@ This is a Go client for the **YoLink/YoSmart smart home API** (`api.yosmart.com`
 
 ### Request/response flow
 
-1. **Auth** — `cmd/homelink/homelink.go` calls `POST /open/yolink/token` with `client_id`/`client_secret` from env vars, receiving an `AuthResponse` (access token).
+1. **Auth** — `cmd/yolink/yolink_api.go` calls `POST /open/yolink/token` with `client_id`/`client_secret` from env vars, receiving an `AuthResponse` (access token).
 2. **API calls** — subsequent requests hit `POST /open/yolink/v2/api` with a `Bearer` token. The request body is a `BasicDownloadDataPacket` (BDDP) and the response is a `BasicUploadDataPacket` (BUDP).
 
 ### Key types (`pkg/types/`)

@@ -6,7 +6,7 @@ transports, and exposes a typed controller for every supported YoLink device, so
 devices, read state, send commands, and subscribe to real‑time reports from Go.
 
 The module is `github.com/tyandl/homelink`. It is primarily a **library**; the
-[`cmd/homelink`](cmd/homelink/homelink.go) program is a small command‑line tool that
+[`cmd/yolink`](cmd/yolink/yolink_api.go) program is a small command‑line tool that
 demonstrates the library (see [Example CLI](#example-cli)).
 
 ## Installation
@@ -137,25 +137,25 @@ home, err = controller.RestoreHome(idFn, secretFn, blob)
 
 ## Example CLI
 
-[`cmd/homelink`](cmd/homelink/homelink.go) is a demonstration program built on the library — a
+[`cmd/yolink`](cmd/yolink/yolink_api.go) is a demonstration program built on the library — a
 handy reference and a convenient way to poke at devices from the shell. It is **not** the
 library's purpose; treat it as example code.
 
 ```bash
-go build -o homelink ./cmd/homelink
+go build ./cmd/yolink
 
 export yolink_client_id=<UAID>
 export yolink_client_secret=<secret>
 
-./homelink ls                                   # list devices: name<TAB>type<TAB>id
-./homelink do getState --on "Front Door"        # call a method, print the typed response
-./homelink do setState --on "Lamp" --state open # pass command parameters
-./homelink listen                               # stream reports as JSON, one per line
-./homelink listen --on "Front Door" | jq        # stream a single device's reports
+./yolink_api ls                                   # list devices: name<TAB>type<TAB>id
+./yolink_api do getState --on "Front Door"        # call a method, print the typed response
+./yolink_api do setState --on "Lamp" --state open # pass command parameters
+./yolink_api listen                               # stream reports as JSON, one per line
+./yolink_api listen --on "Front Door" | jq        # stream a single device's reports
 ```
 
 Global flags: `--output json|go`, `--log debug|info|warn|error`, and
-`--client-id` / `--client-secret` (override the environment variables). Run `./homelink help`
+`--client-id` / `--client-secret` (override the environment variables). Run `./yolink_api help`
 for the full usage.
 
 ## Scripts
@@ -172,12 +172,13 @@ dependencies to install).
   go build ./...   # verify the generated code compiles
   ```
 
-- **`gen_bash_completion.py`** generates a bash completion script for the example CLI from the
-  same device definitions (completing commands, device types, methods, and parameters):
+- **`gen_bash_completion.py`** (in `cmd/yolink/`) generates a bash completion script for the
+  example CLI from the same device definitions (completing commands, device types, methods, and
+  parameters):
 
   ```bash
-  python3 scripts/gen_bash_completion.py > completions/homelink.bash
-  source completions/homelink.bash   # or install under /etc/bash_completion.d/
+  python3 cmd/yolink/gen_bash_completion.py > completions/yolink_api.bash
+  source completions/yolink_api.bash   # or install under /etc/bash_completion.d/
   ```
 
 ## Project layout
@@ -186,9 +187,8 @@ dependencies to install).
 pkg/yolink/controller/  HTTP + MQTT transport, Home, device controllers, save/restore
 pkg/yolink/devices/     generated typed device controllers + their JSON definitions
 pkg/yolink/types/       shared API types (timestamps, enums, status codes, temperature)
-cmd/homelink/           example command-line tool
-scripts/                code generators (device types, bash completion)
-api_doc.txt             upstream device/method and error-code reference
+cmd/yolink/             example command-line tool (binary: yolink_api)
+scripts/                code generators (device types)
 ```
 
 ## Contributing
@@ -209,7 +209,7 @@ Contributions are welcome. To keep history clean and verifiable:
   `type(scope): summary` header — e.g. `feat(devices): add support for the X sensor`,
   `fix(controller): handle expired token on refresh`, `docs: clarify credential setup`.
 
-- **Regenerate, don't hand‑edit.** `pkg/yolink/devices/*_gen.go` and `completions/homelink.bash`
+- **Regenerate, don't hand‑edit.** `pkg/yolink/devices/*_gen.go` and `completions/yolink_api.bash`
   are generated. Change the source (`*.json` definitions or the scripts) and re‑run the
   [scripts](#scripts).
 

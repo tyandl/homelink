@@ -8,8 +8,8 @@
 *.so
 *.dylib
 
-# Compiled command binary (built by `go build` in cmd/homelink)
-/cmd/homelink/homelink
+# Compiled command binary (built by `go build` in cmd/yolink)
+/cmd/yolink/yolink_api
 
 # Test binary, built with `go test -c`
 *.test
