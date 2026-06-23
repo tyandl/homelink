@@ -8,8 +8,11 @@
 *.so
 *.dylib
 
-# Compiled command binary (built by `go build` in cmd/yolink)
+# Compiled command binaries
 /cmd/yolink/yolink_api
+/cmd/flair/flair_api
+/flair_api
+/flair
 
 # Test binary, built with `go test -c`
 *.test
