@@ -2,18 +2,18 @@ package flair
 
 // VentAttributes are the properties of a Flair smart vent.
 type VentAttributes struct {
-	Name              string  `json:"name"`
-	PercentOpen       int     `json:"percent-open"`       // 0–100
-	DuctPressure      float64 `json:"duct-pressure"`      // Pascals
-	DuctTemperatureC  float64 `json:"duct-temperature-c"`
-	MotorRunTime      int     `json:"motor-run-time"`     // seconds
-	FirmwareVersionS  string  `json:"firmware-version-s,omitempty"`
-	Rssi              int     `json:"rssi"`               // dBm
-	HasBuzz           bool    `json:"has-buzz"`
-	IsActive          bool    `json:"is-active"`
-	Inactive          bool    `json:"inactive"`
-	CreatedAt         string  `json:"created-at,omitempty"`
-	UpdatedAt         string  `json:"updated-at,omitempty"`
+	Name             string  `json:"name"`
+	PercentOpen      int     `json:"percent-open"`  // 0–100
+	DuctPressure     float64 `json:"duct-pressure"` // Pascals
+	DuctTemperatureC float64 `json:"duct-temperature-c"`
+	MotorRunTime     int     `json:"motor-run-time"` // seconds
+	FirmwareVersionS string  `json:"firmware-version-s,omitempty"`
+	Rssi             int     `json:"rssi"` // dBm
+	HasBuzz          bool    `json:"has-buzz"`
+	IsActive         bool    `json:"is-active"`
+	Inactive         bool    `json:"inactive"`
+	CreatedAt        string  `json:"created-at,omitempty"`
+	UpdatedAt        string  `json:"updated-at,omitempty"`
 }
 
 // VentPatch describes fields to update on a Vent. Nil fields are not sent.

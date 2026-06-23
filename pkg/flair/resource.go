@@ -165,9 +165,9 @@ type createBody struct {
 }
 
 type createData struct {
-	Type          string                 `json:"type"`
-	Attributes    any                    `json:"attributes"`
-	Relationships map[string]relWrapper  `json:"relationships,omitempty"`
+	Type          string                `json:"type"`
+	Attributes    any                   `json:"attributes"`
+	Relationships map[string]relWrapper `json:"relationships,omitempty"`
 }
 
 type relWrapper struct {

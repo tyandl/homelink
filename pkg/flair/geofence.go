@@ -5,7 +5,7 @@ type GeofenceAttributes struct {
 	Name           string  `json:"name"`
 	Latitude       float64 `json:"latitude"`
 	Longitude      float64 `json:"longitude"`
-	RadiusM        float64 `json:"radius"`          // metres
+	RadiusM        float64 `json:"radius"` // metres
 	Enabled        bool    `json:"enabled"`
 	TriggerOnEntry bool    `json:"trigger-on-entry"`
 	TriggerOnExit  bool    `json:"trigger-on-exit"`

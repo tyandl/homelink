@@ -14,12 +14,12 @@ type ThermostatAttributes struct {
 
 // ThermostatStateAttributes represent the current operating state of a thermostat.
 type ThermostatStateAttributes struct {
-	Mode               types.HvacMode `json:"mode"`
-	FanMode            string         `json:"fan-mode,omitempty"`
-	CurrentCoolTempF   float64        `json:"current-cool-temp-f"`
-	CurrentHeatTempF   float64        `json:"current-heat-temp-f"`
-	CurrentTemperatureF float64       `json:"current-temperature-f"`
-	UpdatedAt          string         `json:"updated-at,omitempty"`
+	Mode                types.HvacMode `json:"mode"`
+	FanMode             string         `json:"fan-mode,omitempty"`
+	CurrentCoolTempF    float64        `json:"current-cool-temp-f"`
+	CurrentHeatTempF    float64        `json:"current-heat-temp-f"`
+	CurrentTemperatureF float64        `json:"current-temperature-f"`
+	UpdatedAt           string         `json:"updated-at,omitempty"`
 }
 
 // ThermostatStatePatch describes fields to update on a ThermostatState. Nil fields are not sent.

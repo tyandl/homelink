@@ -4,14 +4,14 @@ import "github.com/tyandl/homelink/pkg/flair/types"
 
 // HvacUnitAttributes are the properties of an HVAC unit connected to a Structure.
 type HvacUnitAttributes struct {
-	Make           string `json:"make,omitempty"`
-	Model          string `json:"model,omitempty"`
-	Type           string `json:"type,omitempty"` // e.g. "heat-pump", "default"
-	Fuel           string `json:"fuel,omitempty"`
-	HeatingStages  int    `json:"heating-stages"`
-	CoolingStages  int    `json:"cooling-stages"`
-	CreatedAt      string `json:"created-at,omitempty"`
-	UpdatedAt      string `json:"updated-at,omitempty"`
+	Make          string `json:"make,omitempty"`
+	Model         string `json:"model,omitempty"`
+	Type          string `json:"type,omitempty"` // e.g. "heat-pump", "default"
+	Fuel          string `json:"fuel,omitempty"`
+	HeatingStages int    `json:"heating-stages"`
+	CoolingStages int    `json:"cooling-stages"`
+	CreatedAt     string `json:"created-at,omitempty"`
+	UpdatedAt     string `json:"updated-at,omitempty"`
 }
 
 // HvacUnitStateAttributes represent the current operating state of an HVAC unit.
