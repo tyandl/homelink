@@ -1,13 +1,16 @@
 # homelink
 
-A Go client library for the [YoLink/YoSmart](https://www.yosmart.com/) smart home API
-(`api.yosmart.com`). `homelink` handles authentication and token refresh, the HTTP and MQTT
-transports, and exposes a typed controller for every supported YoLink device, so you can list
-devices, read state, send commands, and subscribe to real‑time reports from Go.
+A Go client library for smart home APIs. `homelink` currently supports:
 
-The module is `github.com/tyandl/homelink`. It is primarily a **library**; the
-[`cmd/yolink`](cmd/yolink/yolink_api.go) program is a small command‑line tool that
-demonstrates the library (see [Example CLI](#example-cli)).
+- **[YoLink/YoSmart](https://www.yosmart.com/)** (`api.yosmart.com`) — authentication and token
+  refresh, HTTP and MQTT transports, typed controller for every supported YoLink device; list
+  devices, read state, send commands, subscribe to real‑time reports.
+- **[Flair](https://flair.co/)** (`api.flair.co`) — OAuth 2.0 client-credentials auth with
+  token refresh, typed REST/JSON:API client for structures, rooms, vents, pucks, HVAC units,
+  thermostats, schedules, geofences, and sensor readings.
+
+The module is `github.com/tyandl/homelink`. It is primarily a **library**; the programs under
+`cmd/` demonstrate each API (see [Example CLIs](#example-clis)).
 
 ## Installation
 
@@ -19,24 +22,46 @@ Requires Go 1.24+.
 
 ## Credentials
 
-`homelink` authenticates with a YoLink **User Access Credential** (UAC): a client id (UAID)
-and a secret key. Create one in the YoLink mobile app:
+Both libraries accept credentials as `func() string` suppliers so they can be read from a
+vault, environment, or any other source at call time. Neither library reads the environment
+itself.
+
+### YoLink
+
+Authenticate with a YoLink **User Access Credential** (UAC): a client id (UAID) and a secret
+key. Create one in the YoLink mobile app:
 
 > **Settings → Account → Advanced Settings → User Access Credentials → Create** — this yields a
 > **UAID** (your client id) and a **Secret Key** (your client secret).
 
-See the official YoLink documentation for details and the full API reference:
-
 - YoLink API documentation: <http://doc.yosmart.com/docs/yolinkapi>
 - Getting started / credentials & authorization: <http://doc.yosmart.com>
 
-The library never reads the environment itself — you supply credentials as functions (so they
-can be sourced from a vault, env vars, etc.). The example CLI reads them from the
-`yolink_client_id` and `yolink_client_secret` environment variables.
+The example CLI reads credentials from the `yolink_client_id` and `yolink_client_secret`
+environment variables.
+
+### Flair
+
+Authenticate with Flair OAuth 2.0 credentials (client id and client secret). Obtain them in
+the Flair mobile app:
+
+> **Account → Account Settings → Developer Settings** — create a new OAuth 2.0 client to
+> receive a **Client ID** and **Client Secret**.
+
+- Flair API documentation: <https://documenter.getpostman.com/view/5353571/TzsbKTAG>
+
+The example CLI reads credentials from the `flair_client_id` and `flair_client_secret`
+environment variables.
+
+> **Note:** the Flair API rate-limits access-token creation to roughly 50 requests per day.
+> The client automatically reuses the refresh token to renew access tokens without counting
+> against that limit.
 
 ## Library usage
 
-### Connect and list devices
+### YoLink
+
+#### Connect and list devices
 
 ```go
 package main
@@ -88,7 +113,7 @@ Importing `pkg/yolink/devices` (even as a blank import `_`) registers the typed 
 `*devices.Switch` that you can type‑assert and call typed methods on (e.g. `GetState`,
 `SetState`). Devices without a registered type fall back to the untyped `controller.Device`.
 
-### Send a command
+#### Send a command
 
 ```go
 if lamp, ok := device.(*devices.Switch); ok {
@@ -99,7 +124,7 @@ if lamp, ok := device.(*devices.Switch); ok {
 }
 ```
 
-### Subscribe to real‑time reports (MQTT)
+#### Subscribe to real‑time reports (MQTT)
 
 ```go
 if err := home.InitializeMqtt("tcp://mqtt.api.yosmart.com:8003"); err != nil {
@@ -122,7 +147,7 @@ for report := range reports {
 > endpoint, and the access token travels as the MQTT username. Use the Local Hub broker on a
 > trusted LAN if you need transport encryption.
 
-### Save and restore a home
+#### Save and restore a home
 
 `Home.Save` serializes the host, home info, and device list to JSON so a later `RestoreHome`
 can rebuild the home without re‑fetching the device list (credentials are supplied again at
@@ -135,11 +160,81 @@ blob, err := home.Save()
 home, err = controller.RestoreHome(idFn, secretFn, blob)
 ```
 
-## Example CLI
+### Flair
 
-[`cmd/yolink`](cmd/yolink/yolink_api.go) is a demonstration program built on the library — a
-handy reference and a convenient way to poke at devices from the shell. It is **not** the
-library's purpose; treat it as example code.
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/tyandl/homelink/pkg/flair"
+	flairTypes "github.com/tyandl/homelink/pkg/flair/types"
+)
+
+func main() {
+	client, err := flair.NewClient(
+		"https://api.flair.co",
+		func() string { return os.Getenv("flair_client_id") },
+		func() string { return os.Getenv("flair_client_secret") },
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	structures, err := client.GetStructures()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, structure := range structures.Resources {
+		fmt.Println(structure.Attributes.Name)
+
+		rooms, err := client.GetRooms(structure.ID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, room := range rooms.Resources {
+			vents, err := client.GetVents(room.ID)
+			if err != nil {
+				log.Fatal(err)
+			}
+			for _, vent := range vents.Resources {
+				fmt.Printf("  %s  %d%%\n", vent.Attributes.Name, vent.Attributes.PercentOpen)
+			}
+		}
+	}
+
+	// Set a structure to manual mode and open all vents to 75 %.
+	structure := structures.Resources[0]
+	_, err = client.UpdateStructure(structure.ID, flair.StructurePatch{
+		Mode: flair.Ptr(flairTypes.SystemModeManual),
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+```
+
+Relationship links embedded in each resource let you traverse the object graph without
+hardcoding URLs. Use the package‑level helpers when you want to follow them directly:
+
+```go
+// Follow a relationship link returned by the API rather than constructing a URL.
+rooms, err := flair.ListRelated[flair.RoomAttributes](client, structure.Rel("rooms").Related())
+```
+
+## Example CLIs
+
+The programs under `cmd/` are demonstration tools built on the library — handy references and
+a convenient way to poke at each API from the shell. They are **not** the library's purpose;
+treat them as example code.
+
+### `cmd/yolink` — YoLink CLI
+
+[`cmd/yolink`](cmd/yolink/yolink_api.go) is a full‑featured CLI for the YoLink API.
 
 ```bash
 go build ./cmd/yolink
@@ -157,6 +252,20 @@ export yolink_client_secret=<secret>
 Global flags: `--output json|go`, `--log debug|info|warn|error`, and
 `--client-id` / `--client-secret` (override the environment variables). Run `./yolink_api help`
 for the full usage.
+
+### `cmd/flair` — Flair CLI (stub)
+
+[`cmd/flair`](cmd/flair/flair_api.go) is a minimal stub that authenticates and lists
+structures. It is the intended starting point for a fuller Flair CLI.
+
+```bash
+go build ./cmd/flair
+
+export flair_client_id=<client-id>
+export flair_client_secret=<client-secret>
+
+./flair_api
+```
 
 ## Scripts
 
@@ -187,8 +296,11 @@ dependencies to install).
 pkg/yolink/controller/  HTTP + MQTT transport, Home, device controllers, save/restore
 pkg/yolink/devices/     generated typed device controllers + their JSON definitions
 pkg/yolink/types/       shared API types (timestamps, enums, status codes, temperature)
-cmd/yolink/             example command-line tool (binary: yolink_api)
-scripts/                code generators (device types)
+pkg/flair/              Flair REST/JSON:API client (structures, rooms, vents, pucks, …)
+pkg/flair/types/        Flair-specific enums and auth types
+cmd/yolink/             YoLink example CLI (binary: yolink_api)
+cmd/flair/              Flair example CLI stub (binary: flair_api)
+scripts/                code generators (YoLink device types)
 ```
 
 ## Contributing
