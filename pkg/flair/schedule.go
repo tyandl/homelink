@@ -2,26 +2,26 @@ package flair
 
 // ScheduleAttributes are the properties of a Flair Schedule.
 type ScheduleAttributes struct {
-	Name          string   `json:"name"`
-	DaysOfWeek    []string `json:"days-of-week,omitempty"` // e.g. ["Monday","Wednesday"]
-	IsAutoSchedule bool    `json:"is-auto-schedule"`
-	CreatedAt     string   `json:"created-at,omitempty"`
-	UpdatedAt     string   `json:"updated-at,omitempty"`
+	Name           string   `json:"name"`
+	DaysOfWeek     []string `json:"days-of-week,omitempty"` // e.g. ["Monday","Wednesday"]
+	IsAutoSchedule bool     `json:"is-auto-schedule"`
+	CreatedAt      string   `json:"created-at,omitempty"`
+	UpdatedAt      string   `json:"updated-at,omitempty"`
 }
 
 // SchedulePatch describes fields to update on a Schedule. Nil fields are not sent.
 type SchedulePatch struct {
-	Name       *string   `json:"name,omitempty"`
-	DaysOfWeek []string  `json:"days-of-week,omitempty"`
+	Name       *string  `json:"name,omitempty"`
+	DaysOfWeek []string `json:"days-of-week,omitempty"`
 }
 
 // ScheduleEventAttributes are the properties of a time-based event within a Schedule.
 type ScheduleEventAttributes struct {
-	StartHour     int     `json:"start-hour"`
-	StartMinute   int     `json:"start-minute"`
-	TemperatureC  float64 `json:"temperature-c"`
-	CreatedAt     string  `json:"created-at,omitempty"`
-	UpdatedAt     string  `json:"updated-at,omitempty"`
+	StartHour    int     `json:"start-hour"`
+	StartMinute  int     `json:"start-minute"`
+	TemperatureC float64 `json:"temperature-c"`
+	CreatedAt    string  `json:"created-at,omitempty"`
+	UpdatedAt    string  `json:"updated-at,omitempty"`
 }
 
 // ScheduleEventPatch describes fields to update on a ScheduleEvent. Nil fields are not sent.

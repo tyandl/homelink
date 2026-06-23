@@ -25,7 +25,7 @@ const httpClientTimeout = 30 * time.Second
 const maxResponseBytes = 8 << 20 // 8 MiB
 
 const (
-	acceptJSONAPI  = "application/vnd.api+json"
+	acceptJSONAPI   = "application/vnd.api+json"
 	contentTypeJSON = "application/json"
 )
 

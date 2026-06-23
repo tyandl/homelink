@@ -4,21 +4,21 @@ import "github.com/tyandl/homelink/pkg/flair/types"
 
 // PuckAttributes are the properties of a Flair Puck (the smart hub/sensor device).
 type PuckAttributes struct {
-	Name              string                 `json:"name"`
-	TemperatureC      float64                `json:"temperature-c"`
-	Humidity          float64                `json:"humidity"`          // 0–100 %RH
-	RoomPressureMb    float64                `json:"room-pressure-mb"`  // millibar
-	FirmwareVersionS  string                 `json:"firmware-version-s,omitempty"`
-	HardwareVersionS  string                 `json:"hardware-version-s,omitempty"`
-	IsGateway         bool                   `json:"is-gateway"`
-	PuckDisplayColor  types.PuckColorSelection `json:"puck-display-color,omitempty"`
-	BackgroundColor   types.PuckColorSelection `json:"background-color,omitempty"`
-	Rssi              int                    `json:"rssi"`
-	IsActive          bool                   `json:"is-active"`
-	Inactive          bool                   `json:"inactive"`
-	BeaconInterval    int                    `json:"beacon-interval,omitempty"` // seconds
-	CreatedAt         string                 `json:"created-at,omitempty"`
-	UpdatedAt         string                 `json:"updated-at,omitempty"`
+	Name             string                   `json:"name"`
+	TemperatureC     float64                  `json:"temperature-c"`
+	Humidity         float64                  `json:"humidity"`         // 0–100 %RH
+	RoomPressureMb   float64                  `json:"room-pressure-mb"` // millibar
+	FirmwareVersionS string                   `json:"firmware-version-s,omitempty"`
+	HardwareVersionS string                   `json:"hardware-version-s,omitempty"`
+	IsGateway        bool                     `json:"is-gateway"`
+	PuckDisplayColor types.PuckColorSelection `json:"puck-display-color,omitempty"`
+	BackgroundColor  types.PuckColorSelection `json:"background-color,omitempty"`
+	Rssi             int                      `json:"rssi"`
+	IsActive         bool                     `json:"is-active"`
+	Inactive         bool                     `json:"inactive"`
+	BeaconInterval   int                      `json:"beacon-interval,omitempty"` // seconds
+	CreatedAt        string                   `json:"created-at,omitempty"`
+	UpdatedAt        string                   `json:"updated-at,omitempty"`
 }
 
 // PuckStateAttributes are the most recent sensor readings from a Puck.
