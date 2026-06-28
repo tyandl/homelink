@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code when working with code in this repository.
 
 ## Commands
 
@@ -8,49 +8,62 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Build
 go build ./...
 
-# Run the main binary (requires env vars)
-yolink_client_id=<id> yolink_client_secret=<secret> go run ./cmd/yolink
+# Run (requires env vars)
+YOLINK_CLIENT_ID=<id> YOLINK_CLIENT_SECRET=<secret> FRIGATE_BASE_URL=<url> go run ./cmd/homelink
 
 # Test
 go test ./...
 
-# Run a single test
-go test ./cmd/yolink/... -run TestGetPhrase
+# Build Docker image
+docker build -t homelink .
+
+# Run via Docker Compose (reads from .env)
+docker compose up
 ```
 
 ## Architecture
 
-This is a Go client for the **YoLink/YoSmart smart home API** (`api.yosmart.com`). The module is `github.com/tyandl/homelink`.
+**homelink** is a Go service that bridges YoLink smart-home devices to Frigate NVR.
+It is deployed as a Docker container on TrueNAS Scale.
 
-### Request/response flow
+### Flow
 
-1. **Auth** — `cmd/yolink/yolink_api.go` calls `POST /open/yolink/token` with `client_id`/`client_secret` from env vars, receiving an `AuthResponse` (access token).
-2. **API calls** — subsequent requests hit `POST /open/yolink/v2/api` with a `Bearer` token. The request body is a `BasicDownloadDataPacket` (BDDP) and the response is a `BasicUploadDataPacket` (BUDP).
+1. **YoLink** — connects via HTTP (auth/device list) and MQTT (real-time device reports).
+   Uses `github.com/tyandl/yolink-api` as the client library.
+2. **Event routing** — when a watched device fires a matching report (e.g. a door sensor
+   opens), homelink triggers an action on the target service.
+3. **Frigate** — receives manual event creation requests via its HTTP API. Supports
+   Cloudflare Access service-token auth and optional Frigate native auth.
+4. **HTTP server** — exposes `GET /healthz` for container health checks. IFTTT webhook
+   support is planned but not yet implemented.
 
-### Key types (`pkg/types/`)
+### Package layout
 
-- `AuthResponse` — OAuth token response fields.
-- `Timestamp` — wraps `time.Time`; marshals/unmarshals as Unix epoch int64 (required by the API).
+```
+cmd/homelink/       — main binary; wires config, MQTT listener, HTTP server
+internal/config/    — env var loading and validation
+internal/frigate/   — Frigate HTTP client (CF Access transport, login, event creation)
+```
 
-### YoLink protocol types (`pkg/types/yolink/`)
+### Configuration (environment variables)
 
-- `BasicDownloadDataPacket[T]` (BDDP) — outgoing request envelope. `method` identifies the API action (e.g. `"Home.getDeviceList"`). Use `NewBDDP(method, params)` to construct one with the current timestamp.
-- `BasicUploadDataPacket[T]` (BUDP) — incoming response envelope. `Code` is `"000000"` on success; see `api_doc.txt` for error codes.
-- `Device` / `Devices` — device list payload; `Data` field of a BUDP response.
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `YOLINK_CLIENT_ID` | yes | — | YoLink API client ID |
+| `YOLINK_CLIENT_SECRET` | yes | — | YoLink API client secret |
+| `FRIGATE_BASE_URL` | yes | — | Frigate base URL (e.g. `https://frigate.example.com`) |
+| `CF_ACCESS_CLIENT_ID` | no | — | Cloudflare Access service-token ID |
+| `CF_ACCESS_CLIENT_SECRET` | no | — | Cloudflare Access service-token secret |
+| `FRIGATE_USER` | no | — | Frigate native auth username |
+| `FRIGATE_PASSWORD` | no | — | Frigate native auth password |
+| `PORT` | no | `8080` | HTTP server port |
+| `LOG_LEVEL` | no | `warn` | Log verbosity: debug, info, warn, error |
 
-### Planned structure
+### Planned
 
-Empty placeholder dirs exist for future expansion:
-- `internal/` — internal packages
-- `pkg/` — shared packages (currently holds `types/`)
-- `scripts/` — utility scripts
-- `test/` — integration tests
-- `docs/` — documentation
+- IFTTT outbound webhook (push event to Maker channel)
+- Configurable device→action mappings via env vars (device name, camera, label)
 
 ## Style
 
-- Prefer descriptive variable names over single- or two-letter abbreviations. For example, use `statusCode` instead of `sc`, `response` instead of `resp`, `device` instead of `d`.
-
-### API reference
-
-`api_doc.txt` lists all supported device types and their methods, plus the full error code table. The upstream docs are at `http://doc.yosmart.com/docs/yolinkapi`.
+- Prefer descriptive variable names over single- or two-letter abbreviations.
