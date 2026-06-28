@@ -1,0 +1,26 @@
+services:
+  homelink:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # YoLink credentials (required)
+      YOLINK_CLIENT_ID: ${YOLINK_CLIENT_ID}
+      YOLINK_CLIENT_SECRET: ${YOLINK_CLIENT_SECRET}
+
+      # Frigate (required)
+      FRIGATE_BASE_URL: ${FRIGATE_BASE_URL}
+
+      # Cloudflare Access service token (optional — only needed when Frigate
+      # sits behind a Cloudflare Access policy)
+      CF_ACCESS_CLIENT_ID: ${CF_ACCESS_CLIENT_ID:-}
+      CF_ACCESS_CLIENT_SECRET: ${CF_ACCESS_CLIENT_SECRET:-}
+
+      # Frigate native auth (optional)
+      FRIGATE_USER: ${FRIGATE_USER:-}
+      FRIGATE_PASSWORD: ${FRIGATE_PASSWORD:-}
+
+      # Service settings
+      PORT: ${PORT:-8080}
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
