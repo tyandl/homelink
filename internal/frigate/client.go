@@ -92,16 +92,16 @@ func (client *Client) CreateEvent(camera, label string, params CreateEventParams
 
 // CreateEventParams are the optional fields for a manual Frigate event.
 type CreateEventParams struct {
-	SourceType       string     `json:"source_type,omitempty"`
-	SubLabel         string     `json:"sub_label,omitempty"`
-	Score            float64    `json:"score,omitempty"`
-	Draw             *EventDraw `json:"draw,omitempty"`
+	SourceType string     `json:"source_type,omitempty"`
+	SubLabel   string     `json:"sub_label,omitempty"`
+	Score      float64    `json:"score,omitempty"`
+	Draw       *EventDraw `json:"draw,omitempty"`
 	// Duration is how many seconds the event stays open. 0 requires an explicit /end call.
-	Duration         *int       `json:"duration,omitempty"`
+	Duration *int `json:"duration,omitempty"`
 	// IncludeRecording attaches a recording clip to the event. Defaults to true in Frigate.
-	IncludeRecording *bool      `json:"include_recording,omitempty"`
+	IncludeRecording *bool `json:"include_recording,omitempty"`
 	// PreCapture is seconds of footage before the trigger to include. Frigate's default applies when nil.
-	PreCapture       *int       `json:"pre_capture,omitempty"`
+	PreCapture *int `json:"pre_capture,omitempty"`
 }
 
 // EventDraw carries bounding box information for a Frigate manual event.
