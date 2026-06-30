@@ -30,4 +30,4 @@ log_level = "warn"
 # label         = "mail"             # Frigate event label
 # sub_label     = "mailbox"          # optional secondary label
 # duration      = 30                 # event duration in seconds (default 30)
-# bounding_box  = [0.0, 0.0, 1.0, 1.0]  # optional [x_min, y_min, x_max, y_max], 0.0–1.0
+# bounding_box  = [0.0, 0.0, 1.0, 1.0]  # optional [x, y, dx, dy]: top-left corner + size, 0.0–1.0
