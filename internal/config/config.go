@@ -51,9 +51,15 @@ type DeviceMapping struct {
 	SubLabel string `toml:"sub_label"`
 	// Duration is how long the Frigate event stays open, in seconds. 0 uses the default (30s).
 	Duration int `toml:"duration"`
-	// BoundingBox is an optional [x_min, y_min, x_max, y_max] region in the camera frame,
-	// expressed as fractions of the frame dimensions (0.0–1.0).
+	// BoundingBox is an optional [x, y, dx, dy] region in the camera frame where
+	// x,y is the top-left corner and dx,dy is the width and height, all as
+	// fractions of the frame dimensions (0.0–1.0).
 	BoundingBox []float64 `toml:"bounding_box"`
+	// PreCapture is seconds of footage before the trigger to include in the recording.
+	// Omitted when zero, which lets Frigate apply its own default.
+	PreCapture int `toml:"pre_capture"`
+	// IncludeRecording controls whether a recording clip is attached. Default true.
+	IncludeRecording *bool `toml:"include_recording"`
 }
 
 // fileConfig is the TOML schema for /config/homelink.toml.
@@ -160,7 +166,7 @@ func validateMappings(mappings []DeviceMapping) error {
 			return fmt.Errorf("mapping %d (%s): label is required", i, m.YoLinkDevice)
 		}
 		if len(m.BoundingBox) != 0 && len(m.BoundingBox) != 4 {
-			return fmt.Errorf("mapping %d (%s): bounding_box must have exactly 4 values [x_min, y_min, x_max, y_max]", i, m.YoLinkDevice)
+			return fmt.Errorf("mapping %d (%s): bounding_box must have exactly 4 values [x, y, dx, dy]", i, m.YoLinkDevice)
 		}
 	}
 	return nil

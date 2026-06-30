@@ -92,17 +92,42 @@ func (client *Client) CreateEvent(camera, label string, params CreateEventParams
 
 // CreateEventParams are the optional fields for a manual Frigate event.
 type CreateEventParams struct {
-	SourceType string     `json:"source_type,omitempty"`
-	SubLabel   string     `json:"sub_label,omitempty"`
-	Draw       *EventDraw `json:"draw,omitempty"`
+	SourceType       string     `json:"source_type,omitempty"`
+	SubLabel         string     `json:"sub_label,omitempty"`
+	Score            float64    `json:"score,omitempty"`
+	Draw             *EventDraw `json:"draw,omitempty"`
 	// Duration is how many seconds the event stays open. 0 requires an explicit /end call.
-	Duration *int `json:"duration,omitempty"`
+	Duration         *int       `json:"duration,omitempty"`
+	// IncludeRecording attaches a recording clip to the event. Defaults to true in Frigate.
+	IncludeRecording *bool      `json:"include_recording,omitempty"`
+	// PreCapture is seconds of footage before the trigger to include. Frigate's default applies when nil.
+	PreCapture       *int       `json:"pre_capture,omitempty"`
 }
 
 // EventDraw carries bounding box information for a Frigate manual event.
-// Each box is [x_min, y_min, x_max, y_max] as fractions of the frame (0.0–1.0).
+// Coordinates use [x, y, dx, dy] format (top-left corner + size, 0.0–1.0).
 type EventDraw struct {
-	Boxes [][]float64 `json:"boxes"`
+	Boxes []EventBox `json:"boxes"`
+}
+
+// EventBox is a rendering instruction for the snapshot image, not event metadata.
+// Frigate passes these to draw_snapshot_overlay_boxes which paints them onto the
+// JPEG — they are not stored in the database or searchable.
+//
+// Box coordinates are [x, y, dx, dy]: top-left corner + width/height as fractions
+// of the frame dimensions (0.0–1.0).
+//
+// Label is display text painted next to the rectangle on the snapshot. It is
+// distinct from the event's sub_label, which is a searchable event attribute stored
+// in the database. Use Label only when you want the overlay text to differ from the
+// event label in the URL path; otherwise it is redundant.
+//
+// Color is an optional [R, G, B] tuple (0–255) for the drawn rectangle.
+type EventBox struct {
+	Box   [4]float64 `json:"box"`
+	Score float64    `json:"score,omitempty"`
+	Label string     `json:"label,omitempty"`
+	Color []int      `json:"color,omitempty"`
 }
 
 func (client *Client) postCreateEvent(camera, label string, params CreateEventParams) (*http.Response, error) {

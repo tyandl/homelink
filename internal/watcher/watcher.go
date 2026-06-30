@@ -81,13 +81,21 @@ func (w *Watcher) handle(mapping config.DeviceMapping, reports <-chan controller
 		}
 
 		params := frigate.CreateEventParams{
-			SourceType: "api",
-			SubLabel:   mapping.SubLabel,
-			Duration:   &duration,
+			SourceType:       "api",
+			SubLabel:         mapping.SubLabel,
+			Score:            1,
+			Duration:         &duration,
+			IncludeRecording: mapping.IncludeRecording,
+		}
+		if mapping.PreCapture > 0 {
+			params.PreCapture = &mapping.PreCapture
 		}
 		if len(mapping.BoundingBox) == 4 {
+			bb := mapping.BoundingBox
 			params.Draw = &frigate.EventDraw{
-				Boxes: [][]float64{mapping.BoundingBox},
+				Boxes: []frigate.EventBox{{
+					Box: [4]float64{bb[0], bb[1], bb[2], bb[3]},
+				}},
 			}
 		}
 
