@@ -13,22 +13,9 @@ import (
 
 	"github.com/tyandl/homelink/internal/config"
 	"github.com/tyandl/homelink/internal/frigate"
+	"github.com/tyandl/homelink/internal/watcher"
 	"github.com/tyandl/yolink-api/pkg/controller"
 	_ "github.com/tyandl/yolink-api/pkg/devices"
-	"github.com/tyandl/yolink-api/pkg/devices"
-	"github.com/tyandl/yolink-api/pkg/types"
-)
-
-const (
-	yolinkAPIHost = "https://api.yosmart.com"
-	mqttBroker    = "tcp://mqtt.api.yosmart.com:8003"
-
-	// frigateCamera and frigateLabel are the Frigate event target.
-	// TODO: make these configurable via env vars.
-	frigateCamera   = "Street Camera"
-	frigateLabel    = "mail"
-	frigateSubLabel = "mailbox"
-	frigateDuration = 30 // seconds
 )
 
 func main() {
@@ -48,7 +35,7 @@ func main() {
 	}
 
 	home, err := controller.NewHome(
-		yolinkAPIHost,
+		cfg.YoLinkAPIHost,
 		func() string { return cfg.YoLinkClientID },
 		func() string { return cfg.YoLinkClientSecret },
 	)
@@ -60,29 +47,18 @@ func main() {
 		slog.Error("yolink device list", "error", err)
 		os.Exit(1)
 	}
-	if err := home.InitializeMqtt(mqttBroker); err != nil {
+	if err := home.InitializeMqtt(cfg.MQTTBroker); err != nil {
 		slog.Error("yolink mqtt", "error", err)
 		os.Exit(1)
 	}
 	defer home.CloseMqtt()
 	slog.Info("yolink connected", "home", home.GetName())
 
-	// Watch the mailbox door sensor.
-	// TODO: make the device name configurable via env var.
-	mailbox, err := home.GetDeviceByName("Mailbox Sensor")
-	if err != nil {
-		slog.Error("yolink device lookup", "error", err)
-		os.Exit(1)
-	}
-	reports, stopReports, err := mailbox.Subscribe()
-	if err != nil {
-		slog.Error("yolink subscribe", "error", err)
-		os.Exit(1)
-	}
-	defer stopReports()
-	slog.Info("watching device", "name", mailbox.GetName(), "id", mailbox.GetId())
+	w := watcher.New(cfg.Mappings, home, frigateClient)
+	w.Start()
+	defer w.Stop()
 
-	// HTTP server for health checks.
+	// HTTP server.
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", handleHealth)
 	server := &http.Server{
@@ -96,46 +72,14 @@ func main() {
 		}
 	}()
 
-	// Shut down cleanly on SIGINT / SIGTERM.
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	<-stop
 
-	duration := frigateDuration
-	eventParams := frigate.CreateEventParams{
-		SourceType: "api",
-		SubLabel:   frigateSubLabel,
-		Duration:   &duration,
-	}
-
-	for {
-		select {
-		case <-stop:
-			slog.Info("shutting down")
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-			server.Shutdown(ctx)
-			return
-
-		case report, ok := <-reports:
-			if !ok {
-				slog.Error("yolink report channel closed")
-				return
-			}
-			slog.Debug("yolink report", "device", mailbox.GetName(), "event", report.Event)
-
-			if report.Event != "DoorSensor.Alert" {
-				continue
-			}
-			alert, ok := report.Data.(devices.DoorSensorAlertResponse)
-			if !ok || alert.State != types.DoorStateOpen {
-				continue
-			}
-			slog.Info("door opened — firing frigate event", "camera", frigateCamera, "label", frigateLabel)
-			if err := frigateClient.CreateEvent(frigateCamera, frigateLabel, eventParams); err != nil {
-				slog.Error("frigate create event", "error", err)
-			}
-		}
-	}
+	slog.Info("shutting down")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	server.Shutdown(ctx)
 }
 
 func handleHealth(writer http.ResponseWriter, _ *http.Request) {

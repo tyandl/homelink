@@ -31,8 +31,7 @@ func New(cfg *config.Config) *Client {
 		baseURL: cfg.FrigateBaseURL,
 		config:  cfg,
 		http: &http.Client{
-			Timeout:   15 * time.Second,
-			Transport: cfTransport{base: http.DefaultTransport, config: cfg},
+			Timeout: 15 * time.Second,
 		},
 	}
 }
@@ -93,11 +92,17 @@ func (client *Client) CreateEvent(camera, label string, params CreateEventParams
 
 // CreateEventParams are the optional fields for a manual Frigate event.
 type CreateEventParams struct {
-	SourceType string `json:"source_type,omitempty"`
-	SubLabel   string `json:"sub_label,omitempty"`
-	// Duration is how many seconds the event stays open. Use 0 to require an
-	// explicit /end call.
+	SourceType string     `json:"source_type,omitempty"`
+	SubLabel   string     `json:"sub_label,omitempty"`
+	Draw       *EventDraw `json:"draw,omitempty"`
+	// Duration is how many seconds the event stays open. 0 requires an explicit /end call.
 	Duration *int `json:"duration,omitempty"`
+}
+
+// EventDraw carries bounding box information for a Frigate manual event.
+// Each box is [x_min, y_min, x_max, y_max] as fractions of the frame (0.0–1.0).
+type EventDraw struct {
+	Boxes [][]float64 `json:"boxes"`
 }
 
 func (client *Client) postCreateEvent(camera, label string, params CreateEventParams) (*http.Response, error) {
@@ -113,24 +118,6 @@ func (client *Client) postCreateEvent(camera, label string, params CreateEventPa
 	request.Header.Set("Content-Type", "application/json")
 	return client.http.Do(request)
 }
-
-// cfTransport injects Cloudflare Access service-token headers on every request.
-type cfTransport struct {
-	base   http.RoundTripper
-	config *config.Config
-}
-
-func (t cfTransport) RoundTrip(request *http.Request) (*http.Response, error) {
-	if id := t.config.CFAccessClientID; id != "" {
-		request = request.Clone(request.Context())
-		request.Header.Set("CF-Access-Client-Id", id)
-		request.Header.Set("CF-Access-Client-Secret", t.config.CFAccessClientSecret)
-	}
-	return t.base.RoundTrip(request)
-}
-
-// cfTransport satisfies http.RoundTripper.
-var _ http.RoundTripper = cfTransport{}
 
 // envOr is a helper used in tests.
 func envOr(key, fallback string) string {
