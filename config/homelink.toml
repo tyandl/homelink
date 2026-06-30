@@ -1,0 +1,33 @@
+# homelink configuration
+#
+# Non-sensitive settings only. Credentials and secrets must be set via
+# environment variables (YOLINK_CLIENT_ID, YOLINK_CLIENT_SECRET,
+# FRIGATE_USER, FRIGATE_PASSWORD, WEBHOOK_SECRET).
+#
+# Mount this directory into the container at /config:
+#   volumes:
+#     - ./config:/config:ro
+
+[yolink]
+api_host    = "https://api.yosmart.com"
+mqtt_broker = "tcp://mqtt.api.yosmart.com:8003"
+
+[frigate]
+base_url = "http://frigate:5000"
+
+[server]
+port      = 8080
+log_level = "warn"
+
+# Each [[mappings]] entry subscribes to a YoLink device and creates a Frigate
+# manual event when that device fires an alert.
+#
+# Supported device types: DoorSensor, LeakSensor, Lock, LockV2
+#
+# [[mappings]]
+# yolink_device = "Mailbox Sensor"   # exact name from the YoLink app
+# camera        = "Street Camera"    # Frigate camera name
+# label         = "mail"             # Frigate event label
+# sub_label     = "mailbox"          # optional secondary label
+# duration      = 30                 # event duration in seconds (default 30)
+# bounding_box  = [0.0, 0.0, 1.0, 1.0]  # optional [x_min, y_min, x_max, y_max], 0.0–1.0
