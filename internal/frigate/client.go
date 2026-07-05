@@ -2,6 +2,7 @@ package frigate
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -27,11 +28,18 @@ type Client struct {
 // New constructs a Client from config. Call Login separately if Frigate's own
 // authentication is enabled (FRIGATE_USER is set).
 func New(cfg *config.Config) *Client {
+	transport := http.DefaultTransport
+	if cfg.FrigateInsecureSkipVerify {
+		transport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
+		}
+	}
 	return &Client{
 		baseURL: cfg.FrigateBaseURL,
 		config:  cfg,
 		http: &http.Client{
-			Timeout: 15 * time.Second,
+			Timeout:   15 * time.Second,
+			Transport: transport,
 		},
 	}
 }

@@ -29,6 +29,10 @@ type Config struct {
 	FrigateUser     string
 	FrigatePassword string
 
+	// FrigateInsecureSkipVerify disables TLS certificate verification for Frigate.
+	// Only set this when Frigate uses a self-signed certificate on a trusted network.
+	FrigateInsecureSkipVerify bool
+
 	// Mappings associates YoLink devices with Frigate cameras and event labels.
 	Mappings []DeviceMapping
 
@@ -194,6 +198,9 @@ func loadEnv(cfg *Config) {
 	}
 	if v := os.Getenv("FRIGATE_PASSWORD"); v != "" {
 		cfg.FrigatePassword = v
+	}
+	if v := os.Getenv("FRIGATE_INSECURE_SKIP_VERIFY"); v == "true" || v == "1" {
+		cfg.FrigateInsecureSkipVerify = true
 	}
 	if v := os.Getenv("PORT"); v != "" {
 		if parsed, err := strconv.Atoi(v); err == nil {
