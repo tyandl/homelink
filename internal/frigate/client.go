@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/cookiejar"
 	"os"
 	"time"
 
@@ -34,12 +35,14 @@ func New(cfg *config.Config) *Client {
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
 		}
 	}
+	jar, _ := cookiejar.New(nil)
 	return &Client{
 		baseURL: cfg.FrigateBaseURL,
 		config:  cfg,
 		http: &http.Client{
 			Timeout:   15 * time.Second,
 			Transport: transport,
+			Jar:       jar,
 		},
 	}
 }
