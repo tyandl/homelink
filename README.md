@@ -1,337 +1,129 @@
 # homelink
 
-A Go client library for smart home APIs. `homelink` currently supports:
+A Go service that bridges [YoLink](https://www.yosmart.com/) smart-home devices to
+[Frigate](https://frigate.video/) NVR. When a watched device fires an alert (door opens,
+leak detected, lock unlocked), homelink creates a manual event on the configured Frigate
+camera.
 
-- **[YoLink/YoSmart](https://www.yosmart.com/)** (`api.yosmart.com`) — authentication and token
-  refresh, HTTP and MQTT transports, typed controller for every supported YoLink device; list
-  devices, read state, send commands, subscribe to real‑time reports.
-- **[Flair](https://flair.co/)** (`api.flair.co`) — OAuth 2.0 client-credentials auth with
-  token refresh, typed REST/JSON:API client for structures, rooms, vents, pucks, HVAC units,
-  thermostats, schedules, geofences, and sensor readings.
+## How it works
 
-The module is `github.com/tyandl/homelink`. It is primarily a **library**; the programs under
-`cmd/` demonstrate each API (see [Example CLIs](#example-clis)).
+1. Connects to the YoLink API to enumerate devices and authenticate to the MQTT broker.
+2. Subscribes to real-time reports for every device listed in `[[mappings]]`.
+3. When a mapped device fires an alert, calls the Frigate `/api/events` endpoint to open
+   a manual event on the associated camera.
 
-## Installation
+Supported device types and their triggers:
+
+| Device type | Triggers when |
+|---|---|
+| `DoorSensor` | state → `open` |
+| `LeakSensor` | state → `alert` |
+| `Lock` | state → `unlocked` |
+| `LockV2` | state → `unlocked` |
+
+## Configuration
+
+Settings are loaded in priority order: **defaults → config file → environment variables**.
+Environment variables always win.
+
+### Config file
+
+Mount a TOML file at `/config/homelink.toml` (or set `CONFIG_FILE` to override the path).
+
+```toml
+[yolink]
+api_host    = "https://api.yosmart.com"
+mqtt_broker = "tcp://mqtt.api.yosmart.com:8003"
+
+[frigate]
+base_url = "http://frigate:5000"
+
+[server]
+port      = 8080
+log_level = "warn"   # debug | info | warn | error
+
+[[mappings]]
+yolink_device = "Back Door"     # exact name from the YoLink app
+camera        = "Patio"         # Frigate camera name
+label         = "door"          # Frigate event label
+sub_label     = "back door"     # optional secondary label
+duration      = 30              # event duration in seconds (default 30)
+# pre_capture     = 5           # seconds of footage before trigger (Frigate default if omitted)
+# include_recording = true      # attach a recording clip (Frigate default if omitted)
+# bounding_box  = [0.0, 0.0, 1.0, 1.0]  # [x, y, dx, dy]: top-left corner + size, 0.0–1.0
+```
+
+### Environment variables
+
+Credentials must be supplied via environment variables and are never read from the config file.
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `YOLINK_CLIENT_ID` | yes | — | YoLink API client ID (UAID) |
+| `YOLINK_CLIENT_SECRET` | yes | — | YoLink API secret key |
+| `FRIGATE_BASE_URL` | yes* | — | Frigate base URL (*or set via `[frigate] base_url`) |
+| `FRIGATE_USER` | no | — | Frigate native auth username |
+| `FRIGATE_PASSWORD` | no | — | Frigate native auth password |
+| `FRIGATE_INSECURE_SKIP_VERIFY` | no | — | Set `true` to skip TLS cert verification (self-signed certs) |
+| `YOLINK_API_HOST` | no | `https://api.yosmart.com` | Override YoLink API host |
+| `MQTT_BROKER` | no | `tcp://mqtt.api.yosmart.com:8003` | Override MQTT broker URL |
+| `PORT` | no | `8080` | HTTP server port |
+| `LOG_LEVEL` | no | `warn` | Log verbosity: `debug`, `info`, `warn`, `error` |
+| `CONFIG_FILE` | no | `/config/homelink.toml` | Path to config file |
+
+### YoLink credentials
+
+Create a **User Access Credential** in the YoLink mobile app:
+
+> **Settings → Account → Advanced Settings → User Access Credentials → Create**
+
+This yields a **UAID** (`YOLINK_CLIENT_ID`) and a **Secret Key** (`YOLINK_CLIENT_SECRET`).
+
+## Deployment
+
+### Docker Compose
+
+Create a `.env` file with your credentials:
+
+```env
+YOLINK_CLIENT_ID=your-uaid
+YOLINK_CLIENT_SECRET=your-secret
+```
+
+```yaml
+services:
+  homelink:
+    image: ghcr.io/tyandl/homelink:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config:/config:ro
+    environment:
+      YOLINK_CLIENT_ID: ${YOLINK_CLIENT_ID}
+      YOLINK_CLIENT_SECRET: ${YOLINK_CLIENT_SECRET}
+      FRIGATE_USER: ${FRIGATE_USER:-}
+      FRIGATE_PASSWORD: ${FRIGATE_PASSWORD:-}
+      PORT: ${PORT:-8080}
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
+```
+
+Place your `homelink.toml` at `./config/homelink.toml` alongside the compose file.
+
+### Building from source
+
+Requires Go 1.25+.
 
 ```bash
-go get github.com/tyandl/homelink
+go build ./cmd/homelink
+
+YOLINK_CLIENT_ID=<id> YOLINK_CLIENT_SECRET=<secret> ./homelink
 ```
 
-Requires Go 1.24+.
+## Health check
 
-## Credentials
-
-Both libraries accept credentials as `func() string` suppliers so they can be read from a
-vault, environment, or any other source at call time. Neither library reads the environment
-itself.
-
-### YoLink
-
-Authenticate with a YoLink **User Access Credential** (UAC): a client id (UAID) and a secret
-key. Create one in the YoLink mobile app:
-
-> **Settings → Account → Advanced Settings → User Access Credentials → Create** — this yields a
-> **UAID** (your client id) and a **Secret Key** (your client secret).
-
-- YoLink API documentation: <http://doc.yosmart.com/docs/yolinkapi>
-- Getting started / credentials & authorization: <http://doc.yosmart.com>
-
-The example CLI reads credentials from the `yolink_client_id` and `yolink_client_secret`
-environment variables.
-
-### Flair
-
-Authenticate with Flair OAuth 2.0 credentials (client id and client secret). Obtain them in
-the Flair mobile app:
-
-> **Account → Account Settings → Developer Settings** — create a new OAuth 2.0 client to
-> receive a **Client ID** and **Client Secret**.
-
-- Flair API documentation: <https://documenter.getpostman.com/view/5353571/TzsbKTAG>
-
-The example CLI reads credentials from the `flair_client_id` and `flair_client_secret`
-environment variables.
-
-> **Note:** the Flair API rate-limits access-token creation to roughly 50 requests per day.
-> The client automatically reuses the refresh token to renew access tokens without counting
-> against that limit.
-
-## Library usage
-
-### YoLink
-
-#### Connect and list devices
-
-```go
-package main
-
-import (
-	"fmt"
-	"log"
-	"os"
-
-	"github.com/tyandl/homelink/pkg/yolink/controller"
-	"github.com/tyandl/homelink/pkg/yolink/devices" // registers the typed device controllers
-)
-
-func main() {
-	home, err := controller.NewHome(
-		"https://api.yosmart.com",
-		func() string { return os.Getenv("yolink_client_id") },
-		func() string { return os.Getenv("yolink_client_secret") },
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	deviceList, err := home.GetDeviceList()
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, device := range deviceList {
-		fmt.Printf("%s\t%s\t%s\n", device.GetName(), device.GetType(), device.GetId())
-	}
-
-	// Resolve a device by name and call a typed method on its concrete controller.
-	device, err := home.GetDeviceByName("Front Door")
-	if err != nil {
-		log.Fatal(err)
-	}
-	if sensor, ok := device.(*devices.DoorSensor); ok {
-		state, err := sensor.GetState()
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("state=%s battery=%s\n", state.State.State, state.State.Battery)
-	}
-}
-```
-
-Importing `pkg/yolink/devices` (even as a blank import `_`) registers the typed controllers, so
-`GetDeviceList`/`GetDeviceByName` return concrete types such as `*devices.DoorSensor` or
-`*devices.Switch` that you can type‑assert and call typed methods on (e.g. `GetState`,
-`SetState`). Devices without a registered type fall back to the untyped `controller.Device`.
-
-#### Send a command
-
-```go
-if lamp, ok := device.(*devices.Switch); ok {
-	_, err := lamp.SetState(devices.SwitchSetStateParams{State: types.SwitchCommandOpen})
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-```
-
-#### Subscribe to real‑time reports (MQTT)
-
-```go
-if err := home.InitializeMqtt("tcp://mqtt.api.yosmart.com:8003"); err != nil {
-	log.Fatal(err)
-}
-defer home.CloseMqtt()
-
-reports, stop, err := home.Subscribe() // whole home; or device.Subscribe() for one device
-if err != nil {
-	log.Fatal(err)
-}
-defer stop()
-
-for report := range reports {
-	fmt.Printf("%s reported %s: %v\n", report.Device.GetName(), report.Event, report.Data)
-}
-```
-
-> **Note:** the YoLink cloud MQTT broker is plaintext TCP (port 8003); it exposes no TLS
-> endpoint, and the access token travels as the MQTT username. Use the Local Hub broker on a
-> trusted LAN if you need transport encryption.
-
-#### Save and restore a home
-
-`Home.Save` serializes the host, home info, and device list to JSON so a later `RestoreHome`
-can rebuild the home without re‑fetching the device list (credentials are supplied again at
-restore time and are never written to the blob):
-
-```go
-blob, err := home.Save()
-// ... persist blob ...
-
-home, err = controller.RestoreHome(idFn, secretFn, blob)
-```
-
-### Flair
-
-```go
-package main
-
-import (
-	"fmt"
-	"log"
-	"os"
-
-	"github.com/tyandl/homelink/pkg/flair"
-	flairTypes "github.com/tyandl/homelink/pkg/flair/types"
-)
-
-func main() {
-	client, err := flair.NewClient(
-		"https://api.flair.co",
-		func() string { return os.Getenv("flair_client_id") },
-		func() string { return os.Getenv("flair_client_secret") },
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	structures, err := client.GetStructures()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, structure := range structures.Resources {
-		fmt.Println(structure.Attributes.Name)
-
-		rooms, err := client.GetRooms(structure.ID)
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, room := range rooms.Resources {
-			vents, err := client.GetVents(room.ID)
-			if err != nil {
-				log.Fatal(err)
-			}
-			for _, vent := range vents.Resources {
-				fmt.Printf("  %s  %d%%\n", vent.Attributes.Name, vent.Attributes.PercentOpen)
-			}
-		}
-	}
-
-	// Set a structure to manual mode and open all vents to 75 %.
-	structure := structures.Resources[0]
-	_, err = client.UpdateStructure(structure.ID, flair.StructurePatch{
-		Mode: flair.Ptr(flairTypes.SystemModeManual),
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-```
-
-Relationship links embedded in each resource let you traverse the object graph without
-hardcoding URLs. Use the package‑level helpers when you want to follow them directly:
-
-```go
-// Follow a relationship link returned by the API rather than constructing a URL.
-rooms, err := flair.ListRelated[flair.RoomAttributes](client, structure.Rel("rooms").Related())
-```
-
-## Example CLIs
-
-The programs under `cmd/` are demonstration tools built on the library — handy references and
-a convenient way to poke at each API from the shell. They are **not** the library's purpose;
-treat them as example code.
-
-### `cmd/yolink` — YoLink CLI
-
-[`cmd/yolink`](cmd/yolink/yolink_api.go) is a full‑featured CLI for the YoLink API.
-
-```bash
-go build ./cmd/yolink
-
-export yolink_client_id=<UAID>
-export yolink_client_secret=<secret>
-
-./yolink_api ls                                   # list devices: name<TAB>type<TAB>id
-./yolink_api do getState --on "Front Door"        # call a method, print the typed response
-./yolink_api do setState --on "Lamp" --state open # pass command parameters
-./yolink_api listen                               # stream reports as JSON, one per line
-./yolink_api listen --on "Front Door" | jq        # stream a single device's reports
-```
-
-Global flags: `--output json|go`, `--log debug|info|warn|error`, and
-`--client-id` / `--client-secret` (override the environment variables). Run `./yolink_api help`
-for the full usage.
-
-### `cmd/flair` — Flair CLI (stub)
-
-[`cmd/flair`](cmd/flair/flair_api.go) is a minimal stub that authenticates and lists
-structures. It is the intended starting point for a fuller Flair CLI.
-
-```bash
-go build ./cmd/flair
-
-export flair_client_id=<client-id>
-export flair_client_secret=<client-secret>
-
-./flair_api
-```
-
-## Scripts
-
-The scripts in [`scripts/`](scripts/) are plain Python 3 (standard library only — no
-dependencies to install).
-
-- **`gen_device_types.py`** regenerates the typed device controllers
-  (`pkg/yolink/devices/*_gen.go`) from the per‑device `pkg/yolink/devices/*.json` definitions.
-  Run it after adding or editing a device definition:
-
-  ```bash
-  python3 scripts/gen_device_types.py
-  go build ./...   # verify the generated code compiles
-  ```
-
-- **`gen_bash_completion.py`** (in `cmd/yolink/`) generates a bash completion script for the
-  example CLI from the same device definitions (completing commands, device types, methods, and
-  parameters):
-
-  ```bash
-  python3 cmd/yolink/gen_bash_completion.py > completions/yolink_api.bash
-  source completions/yolink_api.bash   # or install under /etc/bash_completion.d/
-  ```
-
-## Project layout
-
-```
-pkg/yolink/controller/  HTTP + MQTT transport, Home, device controllers, save/restore
-pkg/yolink/devices/     generated typed device controllers + their JSON definitions
-pkg/yolink/types/       shared API types (timestamps, enums, status codes, temperature)
-pkg/flair/              Flair REST/JSON:API client (structures, rooms, vents, pucks, …)
-pkg/flair/types/        Flair-specific enums and auth types
-cmd/yolink/             YoLink example CLI (binary: yolink_api)
-cmd/flair/              Flair example CLI stub (binary: flair_api)
-scripts/                code generators (YoLink device types)
-```
-
-## Contributing
-
-Contributions are welcome. To keep history clean and verifiable:
-
-- **Sign your commits.** All commits must be cryptographically signed and verify (`git commit -S`).
-  Configure a signing key once, e.g.:
-
-  ```bash
-  git config user.signingkey <your-key>
-  git config commit.gpgsign true   # sign every commit automatically
-  ```
-
-  (SSH signing works too: `git config gpg.format ssh`.)
-
-- **Follow [Conventional Commits](https://www.conventionalcommits.org/).** Commit messages use a
-  `type(scope): summary` header — e.g. `feat(devices): add support for the X sensor`,
-  `fix(controller): handle expired token on refresh`, `docs: clarify credential setup`.
-
-- **Regenerate, don't hand‑edit.** `pkg/yolink/devices/*_gen.go` and `completions/yolink_api.bash`
-  are generated. Change the source (`*.json` definitions or the scripts) and re‑run the
-  [scripts](#scripts).
-
-- **Keep it green.** Before opening a pull request:
-
-  ```bash
-  gofmt -l .          # should print nothing
-  go vet ./...
-  go test ./...
-  ```
+`GET /healthz` returns `200 OK` when the service is running. Use it for container health
+checks or uptime monitoring.
 
 ## License
 
