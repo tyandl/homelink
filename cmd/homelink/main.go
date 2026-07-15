@@ -60,7 +60,9 @@ func main() {
 
 	// HTTP server.
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /healthz", handleHealth)
+	mux.HandleFunc("GET /healthz", func(writer http.ResponseWriter, request *http.Request) {
+		handleHealth(writer, request, home)
+	})
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Port),
 		Handler: mux,
@@ -82,7 +84,12 @@ func main() {
 	server.Shutdown(ctx)
 }
 
-func handleHealth(writer http.ResponseWriter, _ *http.Request) {
+func handleHealth(writer http.ResponseWriter, _ *http.Request, home *controller.Home) {
+	if !home.IsMqttConnected() {
+		writer.WriteHeader(http.StatusServiceUnavailable)
+		writer.Write([]byte("mqtt disconnected"))
+		return
+	}
 	writer.WriteHeader(http.StatusOK)
 	writer.Write([]byte("ok"))
 }
