@@ -77,13 +77,23 @@ func (client *Client) Login() error {
 	return nil
 }
 
-// IsHealthy calls Frigate's health check endpoint (GET /api/), which is
-// reachable without authentication even when Frigate's native auth is
-// enabled. It returns nil when Frigate responds with 2xx.
+// IsHealthy calls Frigate's health check endpoint (GET /api/). The endpoint
+// is public at Frigate's application layer, but Frigate's bundled nginx
+// still gates it behind the session cookie when native auth is enabled, so
+// on a 401 this re-authenticates once and retries, same as CreateEvent.
 func (client *Client) IsHealthy() error {
 	response, err := client.http.Get(client.baseURL + "/api/")
 	if err != nil {
 		return err
+	}
+	if response.StatusCode == http.StatusUnauthorized {
+		response.Body.Close()
+		if err := client.Login(); err != nil {
+			return fmt.Errorf("frigate re-auth: %w", err)
+		}
+		if response, err = client.http.Get(client.baseURL + "/api/"); err != nil {
+			return err
+		}
 	}
 	defer response.Body.Close()
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
