@@ -34,6 +34,9 @@ func main() {
 	logConfigFileInfo(cfg)
 
 	frigateClient := frigate.New(cfg)
+	if err := frigateClient.IsHealthy(); err != nil {
+		slog.Warn("frigate health check failed", "error", err)
+	}
 	if err := frigateClient.Login(); err != nil {
 		slog.Warn("frigate login failed", "error", err)
 	}
@@ -65,7 +68,7 @@ func main() {
 	// HTTP server.
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(writer http.ResponseWriter, request *http.Request) {
-		handleHealth(writer, request, home)
+		handleHealth(writer, request, home, frigateClient)
 	})
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Port),
@@ -131,10 +134,15 @@ func logConfigFileInfo(cfg *config.Config) {
 	)
 }
 
-func handleHealth(writer http.ResponseWriter, _ *http.Request, home *controller.Home) {
+func handleHealth(writer http.ResponseWriter, _ *http.Request, home *controller.Home, frigateClient *frigate.Client) {
 	if !home.IsMqttConnected() {
 		writer.WriteHeader(http.StatusServiceUnavailable)
 		writer.Write([]byte("mqtt disconnected"))
+		return
+	}
+	if err := frigateClient.IsHealthy(); err != nil {
+		writer.WriteHeader(http.StatusServiceUnavailable)
+		writer.Write([]byte("frigate unhealthy: " + err.Error()))
 		return
 	}
 	writer.WriteHeader(http.StatusOK)
