@@ -1,5 +1,9 @@
 FROM golang:1.25-alpine AS builder
 
+# git is required for Go's VCS build-info stamping (embeds version/revision
+# into the binary); alpine doesn't ship it by default.
+RUN apk add --no-cache git
+
 WORKDIR /build
 
 COPY go.mod go.sum ./
