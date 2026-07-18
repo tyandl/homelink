@@ -34,11 +34,11 @@ func main() {
 	logConfigFileInfo(cfg)
 
 	frigateClient := frigate.New(cfg)
-	if err := frigateClient.IsHealthy(); err != nil {
-		slog.Warn("frigate health check failed", "error", err)
-	}
 	if err := frigateClient.Login(); err != nil {
 		slog.Warn("frigate login failed", "error", err)
+	}
+	if err := frigateClient.IsHealthy(); err != nil {
+		slog.Warn("frigate health check failed", "error", err)
 	}
 
 	home, err := controller.NewHome(
