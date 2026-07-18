@@ -1,10 +1,13 @@
 package config
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/BurntSushi/toml"
 )
@@ -41,6 +44,15 @@ type Config struct {
 
 	// Log verbosity: debug, info, warn, error. Defaults to warn.
 	LogLevel string
+
+	// ConfigFilePath is the path the config file was loaded from, empty if
+	// no config file was found.
+	ConfigFilePath string
+	// ConfigFileModTime is the config file's last-modified time.
+	ConfigFileModTime time.Time
+	// ConfigFileChecksum is the hex-encoded SHA-256 checksum of the config
+	// file's contents.
+	ConfigFileChecksum string
 }
 
 // DeviceMapping binds a YoLink device to a Frigate camera event.
@@ -125,7 +137,7 @@ func Load() (*Config, error) {
 func loadFile(cfg *Config) error {
 	path := firstNonEmpty(os.Getenv("CONFIG_FILE"), defaultConfigPath)
 
-	data, err := os.ReadFile(path)
+	info, err := os.Stat(path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return nil
@@ -133,10 +145,20 @@ func loadFile(cfg *Config) error {
 		return fmt.Errorf("config file %s: %w", path, err)
 	}
 
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("config file %s: %w", path, err)
+	}
+
 	var fc fileConfig
 	if _, err := toml.Decode(string(data), &fc); err != nil {
 		return fmt.Errorf("config file %s: %w", path, err)
 	}
+
+	checksum := sha256.Sum256(data)
+	cfg.ConfigFilePath = path
+	cfg.ConfigFileModTime = info.ModTime()
+	cfg.ConfigFileChecksum = hex.EncodeToString(checksum[:])
 
 	if fc.YoLink.APIHost != "" {
 		cfg.YoLinkAPIHost = fc.YoLink.APIHost

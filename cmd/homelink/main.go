@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"strings"
 	"syscall"
 	"time"
@@ -28,6 +29,9 @@ func main() {
 		fmt.Fprintf(os.Stderr, "homelink: %v\n", err)
 		os.Exit(1)
 	}
+
+	logBuildInfo()
+	logConfigFileInfo(cfg)
 
 	frigateClient := frigate.New(cfg)
 	if err := frigateClient.Login(); err != nil {
@@ -82,6 +86,49 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	server.Shutdown(ctx)
+}
+
+// logBuildInfo logs the module version and VCS revision embedded in the
+// binary by the Go toolchain, so a running container can be traced back to
+// the exact build that produced it.
+func logBuildInfo() {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		slog.Info("starting homelink", "version", "unknown")
+		return
+	}
+
+	var revision string
+	var dirty bool
+	for _, setting := range info.Settings {
+		switch setting.Key {
+		case "vcs.revision":
+			revision = setting.Value
+		case "vcs.modified":
+			dirty = setting.Value == "true"
+		}
+	}
+
+	slog.Info("starting homelink",
+		"version", info.Main.Version,
+		"revision", revision,
+		"dirty", dirty,
+		"go", info.GoVersion,
+	)
+}
+
+// logConfigFileInfo logs which config file was loaded, along with its last
+// modified time and checksum, so config drift is visible in the logs.
+func logConfigFileInfo(cfg *config.Config) {
+	if cfg.ConfigFilePath == "" {
+		slog.Info("no config file found, using defaults and environment variables")
+		return
+	}
+	slog.Info("config file loaded",
+		"path", cfg.ConfigFilePath,
+		"modified", cfg.ConfigFileModTime,
+		"sha256", cfg.ConfigFileChecksum,
+	)
 }
 
 func handleHealth(writer http.ResponseWriter, _ *http.Request, home *controller.Home) {
