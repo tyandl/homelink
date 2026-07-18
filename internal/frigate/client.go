@@ -77,6 +77,22 @@ func (client *Client) Login() error {
 	return nil
 }
 
+// IsHealthy calls Frigate's health check endpoint (GET /api/), which is
+// reachable without authentication even when Frigate's native auth is
+// enabled. It returns nil when Frigate responds with 2xx.
+func (client *Client) IsHealthy() error {
+	response, err := client.http.Get(client.baseURL + "/api/")
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		snippet, _ := io.ReadAll(io.LimitReader(response.Body, 512))
+		return fmt.Errorf("frigate health check %s: %s", response.Status, snippet)
+	}
+	return nil
+}
+
 // CreateEvent fires a manual event on the given camera with the given label.
 // On a 401 it re-authenticates once and retries.
 func (client *Client) CreateEvent(camera, label string, params CreateEventParams) error {
