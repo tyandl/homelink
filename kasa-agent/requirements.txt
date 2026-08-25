@@ -1,0 +1,4 @@
+python-kasa==0.10.2
+tzdata
+fastapi==0.115.*
+uvicorn[standard]==0.32.*

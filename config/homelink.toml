@@ -7,6 +7,12 @@
 # Mount this directory into the container at /config:
 #   volumes:
 #     - ./config:/config:ro
+#
+# Each [[rules]] entry binds one trigger (a device event on some service) to
+# one or more actions (something to do on some service, possibly a
+# different one). Only the services actually referenced below are ever
+# connected to: a service with no [[rules]] trigger never subscribes or
+# polls, and a service with no [[rules]] action never gets a client built.
 
 [yolink]
 api_host    = "https://api.yosmart.com"
@@ -15,19 +21,93 @@ mqtt_broker = "tcp://mqtt.api.yosmart.com:8003"
 [frigate]
 base_url = "http://frigate:5000"
 
+[kasa]
+# Base URL of the kasa-agent sidecar (see docker-compose.yml).
+agent_base_url = "http://kasa-agent:8090"
+
+# No device list here: `device` in [[rules.actions]] below is the exact
+# name set in the Kasa app (e.g. "Porch Light"). kasa-agent resolves that
+# name to an IP itself, by scanning its configured subnet
+# (KASA_SCAN_SUBNET) and reading each device's self-reported alias -- see
+# docker-compose.yml for the agent's scan/refresh/retry settings.
+
 [server]
 port      = 8080
 log_level = "warn"
 
-# Each [[mappings]] entry subscribes to a YoLink device and creates a Frigate
-# manual event when that device fires an alert.
+# Trigger event vocabulary (service = "yolink"):
+#   door.opened, door.closed       (DoorSensor)
+#   leak.detected, leak.dry        (LeakSensor)
+#   lock.unlocked, lock.locked     (Lock, LockV2)
 #
-# Supported device types: DoorSensor, LeakSensor, Lock, LockV2
+# Trigger event vocabulary (service = "timer"):
+#   expired       device = the timer's name, set via a timer "set" action
+#   time_of_day   device = an arbitrary label for this schedule; also needs
+#                 `at = "HH:MM"` (24-hour, local time — set the TZ env var)
 #
-# [[mappings]]
-# yolink_device = "Mailbox Sensor"   # exact name from the YoLink app
-# camera        = "Street Camera"    # Frigate camera name
-# label         = "mail"             # Frigate event label
-# sub_label     = "mailbox"          # optional secondary label
-# duration      = 30                 # event duration in seconds (default 30)
-# bounding_box  = [0.0, 0.0, 1.0, 1.0]  # optional [x, y, dx, dy]: top-left corner + size, 0.0–1.0
+# Action verbs (service = "frigate"):
+#   create_event   (fields: label, sub_label, duration, bounding_box,
+#                   pre_capture, include_recording)
+#
+# Action verbs (service = "kasa"):
+#   turn_on, turn_off, toggle, set_brightness (needs `brightness`, 0-100),
+#   led_on, led_off
+#
+# Action verbs (service = "timer"):
+#   set     device = timer name, needs `duration` (Go syntax: "5m", "1h30m")
+#   cancel  device = timer name; no-op if that timer isn't running
+
+# [[rules]]
+# name = "mailbox opened"
+#
+# [rules.trigger]
+# service = "yolink"
+# device  = "Mailbox Sensor"   # exact name from the YoLink app
+# event   = "door.opened"
+#
+# [[rules.actions]]
+# service       = "frigate"
+# device        = "Street Camera"  # Frigate camera name
+# action        = "create_event"
+# label         = "mail"
+# sub_label     = "mailbox"
+# duration      = 30
+# bounding_box  = [0.0, 0.0, 1.0, 1.0]  # [x, y, dx, dy], 0.0-1.0
+#
+# [[rules.actions]]
+# service = "kasa"
+# device  = "Porch Light"          # exact name from the Kasa app
+# action  = "turn_on"
+#
+# [[rules.actions]]
+# service  = "timer"
+# device   = "mailbox lit"         # arbitrary timer name
+# action   = "set"
+# duration = "5m"
+#
+# [[rules]]
+# name = "mailbox light timeout"
+#
+# [rules.trigger]
+# service = "timer"
+# device  = "mailbox lit"          # matches the "set" action's device above
+# event   = "expired"
+#
+# [[rules.actions]]
+# service = "kasa"
+# device  = "Porch Light"
+# action  = "turn_off"
+#
+# [[rules]]
+# name = "porch light at 4pm"
+#
+# [rules.trigger]
+# service = "timer"
+# device  = "afternoon"            # arbitrary schedule label
+# event   = "time_of_day"
+# at      = "16:00"
+#
+# [[rules.actions]]
+# service = "kasa"
+# device  = "Porch Light"
+# action  = "turn_on"
