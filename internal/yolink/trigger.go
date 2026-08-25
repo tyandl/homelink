@@ -42,6 +42,9 @@ var eventPredicates = map[string]func(controller.Report) bool{
 		if alert, ok := r.Data.(devices.LockAlertResponse); ok && r.Event == "Lock.Alert" {
 			return alert.State == types.LockStateUnlocked
 		}
+		if change, ok := r.Data.(devices.LockStatusChangeResponse); ok && r.Event == "Lock.StatusChange" {
+			return change.State == types.LockStateUnlocked
+		}
 		if alert, ok := r.Data.(devices.LockV2AlertResponse); ok && r.Event == "LockV2.Alert" {
 			return alert.Lock == types.LockStateUnlocked
 		}
@@ -50,6 +53,9 @@ var eventPredicates = map[string]func(controller.Report) bool{
 	"lock.locked": func(r controller.Report) bool {
 		if alert, ok := r.Data.(devices.LockAlertResponse); ok && r.Event == "Lock.Alert" {
 			return alert.State == types.LockStateLocked
+		}
+		if change, ok := r.Data.(devices.LockStatusChangeResponse); ok && r.Event == "Lock.StatusChange" {
+			return change.State == types.LockStateLocked
 		}
 		if alert, ok := r.Data.(devices.LockV2AlertResponse); ok && r.Event == "LockV2.Alert" {
 			return alert.Lock == types.LockStateLocked
