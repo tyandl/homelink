@@ -6,6 +6,8 @@ github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aN
 github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/tyandl/yolink-api/v2 v2.0.1 h1:WcrZTFTXamXMVjwLyZFuGr+FF+MrvvKWLCLJgp+V+fo=
 github.com/tyandl/yolink-api/v2 v2.0.1/go.mod h1:kgu0DQPe+Zqwn9wFZIlC2l8hFsDIn/x3nDJkPg3X0UA=
+github.com/tyandl/yolink-api/v2 v2.0.2 h1:OgOCQFLi3b/YlNOIu6a+ZKy4LWrBPt95w3eC8GMqoKo=
+github.com/tyandl/yolink-api/v2 v2.0.2/go.mod h1:kgu0DQPe+Zqwn9wFZIlC2l8hFsDIn/x3nDJkPg3X0UA=
 golang.org/x/net v0.55.0 h1:bcvxaJn3e1U6InsFWt1JUq1aSjnRxLzT2rtD2KfkDF8=
 golang.org/x/net v0.55.0/go.mod h1:L5U2KuzuOe1lY7Z+aWVIKK6qEeJXnXV9yzGA+WCHJww=
 golang.org/x/sync v0.17.0 h1:l60nONMj9l5drqw6jlhIELNv9I0A4OFgRsG9k2oT9Ug=
