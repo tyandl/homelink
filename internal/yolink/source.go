@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/tyandl/homelink/internal/engine"
-	"github.com/tyandl/yolink-api/pkg/controller"
+	"github.com/tyandl/yolink-api/v2/pkg/controller"
 )
 
 // Source implements engine.Source for YoLink. It only ever subscribes to

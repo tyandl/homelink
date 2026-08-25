@@ -19,7 +19,7 @@ import (
 	"github.com/tyandl/homelink/internal/kasa"
 	"github.com/tyandl/homelink/internal/timer"
 	"github.com/tyandl/homelink/internal/yolink"
-	"github.com/tyandl/yolink-api/pkg/controller"
+	"github.com/tyandl/yolink-api/v2/pkg/controller"
 )
 
 func main() {
@@ -117,7 +117,7 @@ func main() {
 		}
 
 		home, err = controller.NewHome(
-			yolinkSettings.APIHost,
+			yolinkSettings.Options,
 			func() string { return yolinkSettings.ClientID },
 			func() string { return yolinkSettings.ClientSecret },
 		)
@@ -129,7 +129,7 @@ func main() {
 			slog.Error("yolink device list", "error", err)
 			os.Exit(1)
 		}
-		if err := home.InitializeMqtt(yolinkSettings.MQTTBroker); err != nil {
+		if err := home.InitializeMqtt(); err != nil {
 			slog.Error("yolink mqtt", "error", err)
 			os.Exit(1)
 		}
