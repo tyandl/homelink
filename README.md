@@ -103,8 +103,11 @@ Full trigger event vocabulary and action verb reference is in `CLAUDE.md`.
 | `KASA_LOOKUP_MAX_RETRIES` *(kasa-agent)* | no | `2` | On-demand rescans on a cache-miss lookup before failing |
 | `KASA_LOOKUP_RETRY_DELAY_SECONDS` *(kasa-agent)* | no | `2` | Delay between those rescans |
 | `KASA_USERNAME` / `KASA_PASSWORD` *(kasa-agent)* | only for a device linked to a TP-Link cloud account | — | Both-or-neither; the agent exits at startup if only one is set |
-| `YOLINK_API_HOST` | no | `https://api.yosmart.com` | Override YoLink API host |
-| `MQTT_BROKER` | no | `tcp://mqtt.api.yosmart.com:8003` | Override MQTT broker URL |
+| `YOLINK_API_HOST` | no | `https://api.yosmart.com` | Cloud API host override (or `[yolink.cloud] api_host`). Cannot combine with `YOLINK_LOCAL_HOST`/`[yolink.local]`. |
+| `MQTT_BROKER` | no | `tcp://mqtt.api.yosmart.com:8003` | Cloud MQTT broker override (or `[yolink.cloud] mqtt_broker`). Cannot combine with `YOLINK_LOCAL_HOST`/`[yolink.local]`. |
+| `YOLINK_LOCAL_HOST` | no | — | Connect to a Local Hub instead of the cloud (or `[yolink.local] host`). Setting this alone (with `YOLINK_NET_ID`) is enough to switch modes, even with no `[yolink.local]` in the file. |
+| `YOLINK_NET_ID` | with `YOLINK_LOCAL_HOST` | — | The Local Hub's "Net Id" from the YoLink app's hub details (or `[yolink.local] net_id`); not obtainable via the API. |
+| `YOLINK_LOCAL_HTTP_PORT` / `YOLINK_LOCAL_MQTT_PORT` | no | `1080` / `18080` | Override the Local Hub's ports (or `[yolink.local] http_port`/`mqtt_port`). |
 | `TZ` | a rule uses `time_of_day` | UTC | IANA zone name `at` times are interpreted in |
 | `PORT` | no | `8080` | HTTP server port |
 | `LOG_LEVEL` | no | `warn` | Log verbosity: `debug`, `info`, `warn`, `error` |

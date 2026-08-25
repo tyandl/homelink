@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/BurntSushi/toml"
-	"github.com/tyandl/yolink-api/pkg/controller"
-	"github.com/tyandl/yolink-api/pkg/devices"
-	"github.com/tyandl/yolink-api/pkg/types"
+	"github.com/tyandl/yolink-api/v2/pkg/controller"
+	"github.com/tyandl/yolink-api/v2/pkg/devices"
+	"github.com/tyandl/yolink-api/v2/pkg/types"
 )
 
 // TriggerConfig is the yolink-specific portion of a [rules.trigger] table.

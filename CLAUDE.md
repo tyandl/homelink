@@ -200,8 +200,11 @@ action  = "turn_on"
 | `KASA_LOOKUP_MAX_RETRIES` *(kasa-agent)* | no | `2` | On-demand rescans on a cache-miss lookup before returning 404 |
 | `KASA_LOOKUP_RETRY_DELAY_SECONDS` *(kasa-agent)* | no | `2` | Delay between those rescans |
 | `KASA_USERNAME` / `KASA_PASSWORD` *(kasa-agent)* | only for a cloud-linked device | — | TP-Link cloud account, both-or-neither |
-| `YOLINK_API_HOST` | no | see file | Override YoLink API host |
-| `MQTT_BROKER` | no | see file | Override MQTT broker URL |
+| `YOLINK_API_HOST` | no | see file | Cloud API host override (or `[yolink.cloud] api_host`). Cannot combine with `YOLINK_LOCAL_HOST`/`[yolink.local]`. |
+| `MQTT_BROKER` | no | see file | Cloud MQTT broker override (or `[yolink.cloud] mqtt_broker`). Cannot combine with `YOLINK_LOCAL_HOST`/`[yolink.local]`. |
+| `YOLINK_LOCAL_HOST` | no | — | Connect to a Local Hub instead of the cloud (or `[yolink.local] host`). Alone with `YOLINK_NET_ID`, switches mode with no `[yolink.local]` in the file needed. |
+| `YOLINK_NET_ID` | with `YOLINK_LOCAL_HOST` | — | Local Hub's "Net Id" from the YoLink app's hub details (or `[yolink.local] net_id`); not obtainable via the API. |
+| `YOLINK_LOCAL_HTTP_PORT` / `YOLINK_LOCAL_MQTT_PORT` | no | `1080` / `18080` | Override the Local Hub's ports (or `[yolink.local] http_port`/`mqtt_port`). |
 | `TZ` | a rule uses `time_of_day` | UTC | IANA zone name `at` times are interpreted in (zoneinfo is embedded in the binary, no volume mount needed) |
 | `PORT` | no | `8080` | HTTP server port |
 | `LOG_LEVEL` | no | `warn` | Log verbosity: debug, info, warn, error |

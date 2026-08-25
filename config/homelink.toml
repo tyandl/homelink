@@ -15,8 +15,30 @@
 # polls, and a service with no [[rules]] action never gets a client built.
 
 [yolink]
+# [yolink] itself takes no fields -- cloud and Local Hub settings are
+# genuinely disjoint (nothing is meaningful in both modes), so it's just
+# the namespace [yolink.cloud]/[yolink.local] live under. Exactly one of
+# the two sub-tables may be present; combining them is a config load
+# error. Neither is required: with no [yolink.cloud]/[yolink.local] at
+# all, cloud with the default endpoints is used.
+
+[yolink.cloud]
+# Optional overrides of the production cloud endpoints, only needed to
+# point at a different cloud environment (e.g. staging).
 api_host    = "https://api.yosmart.com"
 mqtt_broker = "tcp://mqtt.api.yosmart.com:8003"
+
+# To connect to a Local Hub on the LAN instead of the cloud, remove
+# [yolink.cloud] above and use [yolink.local] instead. A Local Hub broker
+# uses a different auth scheme and topic layout than cloud entirely
+# (client ID/secret, not a token; ylsubnet/ topics, not yl-home/),
+# handled automatically once you connect this way.
+#
+# [yolink.local]
+# host      = "192.168.1.50"  # the hub's LAN address
+# net_id    = "C00295"        # YoLink app: hub details -> "Net Id" (not available via the API)
+# http_port = 1080             # optional, default 1080
+# mqtt_port = 18080            # optional, default 18080
 
 [frigate]
 base_url = "http://frigate:5000"

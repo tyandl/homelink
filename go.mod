@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/BurntSushi/toml v1.6.0
-	github.com/tyandl/yolink-api v0.0.0-20260715145026-b07d3c66dc79
+	github.com/tyandl/yolink-api/v2 v2.0.1
 )
 
 require (
