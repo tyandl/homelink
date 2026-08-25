@@ -56,6 +56,14 @@ var eventPredicates = map[string]func(controller.Report) bool{
 		}
 		return false
 	},
+	"motion.detected": func(r controller.Report) bool {
+		alert, ok := r.Data.(devices.MotionSensorAlertResponse)
+		return ok && r.Event == "MotionSensor.Alert" && alert.State == types.AlertStateAlert
+	},
+	"motion.clear": func(r controller.Report) bool {
+		alert, ok := r.Data.(devices.MotionSensorAlertResponse)
+		return ok && r.Event == "MotionSensor.Alert" && alert.State == types.AlertStateNormal
+	},
 }
 
 // DecodeTrigger decodes a [rules.trigger] primitive into a TriggerConfig and
@@ -69,7 +77,7 @@ func DecodeTrigger(meta toml.MetaData, prim toml.Primitive) (TriggerConfig, erro
 		return TriggerConfig{}, fmt.Errorf("yolink trigger: device is required")
 	}
 	if _, ok := eventPredicates[tc.Event]; !ok {
-		return TriggerConfig{}, fmt.Errorf("yolink trigger: unknown event %q (want one of door.opened, door.closed, leak.detected, leak.dry, lock.unlocked, lock.locked)", tc.Event)
+		return TriggerConfig{}, fmt.Errorf("yolink trigger: unknown event %q (want one of door.opened, door.closed, leak.detected, leak.dry, lock.unlocked, lock.locked, motion.detected, motion.clear)", tc.Event)
 	}
 	return tc, nil
 }

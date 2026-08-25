@@ -221,6 +221,7 @@ error naming the rule.
 | `door.opened` / `door.closed` | `DoorSensor` state transitions |
 | `leak.detected` / `leak.dry` | `LeakSensor` state transitions |
 | `lock.unlocked` / `lock.locked` | `Lock` / `LockV2` state transitions |
+| `motion.detected` / `motion.clear` | `MotionSensor` state transitions |
 
 **Trigger event vocabulary** (`service = "timer"`):
 
