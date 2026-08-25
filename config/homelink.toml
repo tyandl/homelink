@@ -39,6 +39,7 @@ log_level = "warn"
 #   door.opened, door.closed       (DoorSensor)
 #   leak.detected, leak.dry        (LeakSensor)
 #   lock.unlocked, lock.locked     (Lock, LockV2)
+#   motion.detected, motion.clear  (MotionSensor)
 #
 # Trigger event vocabulary (service = "timer"):
 #   expired       device = the timer's name, set via a timer "set" action
