@@ -43,8 +43,8 @@ jobs:
       - name: Test (race detector)
         run: go test -race -count=1 ./...
 
-  publish:
-    name: Publish Docker image
+  publish-homelink:
+    name: Publish homelink Docker image
     runs-on: ubuntu-latest
     needs: test
     if: github.event_name == 'push'
@@ -74,5 +74,39 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+
+  publish-kasa-agent:
+    name: Publish kasa-agent Docker image
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push'
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Log in to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/tyandl/homelink-kasa-agent
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./kasa-agent
           push: true
           tags: ${{ steps.meta.outputs.tags }}
