@@ -8,10 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/cookiejar"
-	"os"
 	"time"
-
-	"github.com/tyandl/homelink/internal/config"
 )
 
 const maxResponseBytes = 8 << 20 // 8 MiB
@@ -21,24 +18,26 @@ const maxResponseBytes = 8 << 20 // 8 MiB
 // cfTransport. When Frigate's native auth is also enabled, Login must be called
 // once to obtain a session cookie, which the embedded jar carries forward.
 type Client struct {
-	baseURL string
-	http    *http.Client
-	config  *config.Config
+	baseURL  string
+	http     *http.Client
+	user     string
+	password string
 }
 
-// New constructs a Client from config. Call Login separately if Frigate's own
-// authentication is enabled (FRIGATE_USER is set).
-func New(cfg *config.Config) *Client {
+// New constructs a Client from Settings. Call Login separately if Frigate's
+// own authentication is enabled (settings.User is set).
+func New(settings Settings) *Client {
 	transport := http.DefaultTransport
-	if cfg.FrigateInsecureSkipVerify {
+	if settings.InsecureSkipVerify {
 		transport = &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
 		}
 	}
 	jar, _ := cookiejar.New(nil)
 	return &Client{
-		baseURL: cfg.FrigateBaseURL,
-		config:  cfg,
+		baseURL:  settings.BaseURL,
+		user:     settings.User,
+		password: settings.Password,
 		http: &http.Client{
 			Timeout:   15 * time.Second,
 			Transport: transport,
@@ -48,14 +47,14 @@ func New(cfg *config.Config) *Client {
 }
 
 // Login authenticates to Frigate via POST /api/login, storing the session
-// cookie in the client jar. It is a no-op when FRIGATE_USER is not set.
+// cookie in the client jar. It is a no-op when no user is configured.
 func (client *Client) Login() error {
-	if client.config.FrigateUser == "" {
+	if client.user == "" {
 		return nil
 	}
 	body, err := json.Marshal(map[string]string{
-		"user":     client.config.FrigateUser,
-		"password": client.config.FrigatePassword,
+		"user":     client.user,
+		"password": client.password,
 	})
 	if err != nil {
 		return err
@@ -179,12 +178,4 @@ func (client *Client) postCreateEvent(camera, label string, params CreateEventPa
 	}
 	request.Header.Set("Content-Type", "application/json")
 	return client.http.Do(request)
-}
-
-// envOr is a helper used in tests.
-func envOr(key, fallback string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return fallback
 }

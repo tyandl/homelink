@@ -7,17 +7,64 @@ services:
     volumes:
       - ./config:/config:ro
     environment:
-      # YoLink credentials (required)
-      YOLINK_CLIENT_ID: ${YOLINK_CLIENT_ID}
-      YOLINK_CLIENT_SECRET: ${YOLINK_CLIENT_SECRET}
+      # Required only when a rule's trigger uses service = "yolink".
+      YOLINK_CLIENT_ID: ${YOLINK_CLIENT_ID:-}
+      YOLINK_CLIENT_SECRET: ${YOLINK_CLIENT_SECRET:-}
 
-      # Frigate (required)
-      FRIGATE_BASE_URL: ${FRIGATE_BASE_URL}
-
+      # Required only when a rule's action uses service = "frigate".
+      FRIGATE_BASE_URL: ${FRIGATE_BASE_URL:-}
       # Frigate native auth (optional)
       FRIGATE_USER: ${FRIGATE_USER:-}
       FRIGATE_PASSWORD: ${FRIGATE_PASSWORD:-}
 
+      # Required only when a rule's action uses service = "kasa". Points at
+      # the kasa-agent sidecar below; leave as-is when using this compose file.
+      KASA_AGENT_BASE_URL: http://kasa-agent:8090
+
       # Service settings
       PORT: ${PORT:-8080}
       LOG_LEVEL: ${LOG_LEVEL:-warn}
+
+      # Timezone for timer's "time_of_day" triggers (e.g. at = "16:00"),
+      # as an IANA zone name. The binary embeds the full zoneinfo database,
+      # so no volume mount is needed for this to resolve correctly. Unset
+      # means UTC.
+      TZ: ${TZ:-}
+    depends_on:
+      - kasa-agent
+
+  # Sidecar wrapping python-kasa (see kasa-agent/app.py for why: current
+  # Kasa firmware needs KLAP, which has no mature Go implementation). Only
+  # needed when at least one rule has a kasa action. Devices are addressed
+  # by name only -- this agent scans KASA_SCAN_SUBNET itself and resolves
+  # names to hosts from each device's own self-reported alias, so homelink's
+  # config never contains an IP.
+  kasa-agent:
+    build: ./kasa-agent
+    restart: unless-stopped
+    environment:
+      # Required: the subnet to scan for Kasa devices, CIDR notation
+      # (e.g. 192.168.1.0/24). Set this in your .env file — kasa-agent exits
+      # with a clear error at startup if it's unset. (This service starts
+      # unconditionally under this compose file; comment it and the
+      # depends_on above out if no rule uses a kasa action.)
+      KASA_SCAN_SUBNET: ${KASA_SCAN_SUBNET:-}
+      # How often to rescan in the background to pick up IP/name changes.
+      KASA_SCAN_INTERVAL_SECONDS: ${KASA_SCAN_INTERVAL_SECONDS:-300}
+      # On a cache-miss lookup, how many on-demand rescans to try (with a
+      # delay between each) before giving up and returning 404.
+      KASA_LOOKUP_MAX_RETRIES: ${KASA_LOOKUP_MAX_RETRIES:-2}
+      KASA_LOOKUP_RETRY_DELAY_SECONDS: ${KASA_LOOKUP_RETRY_DELAY_SECONDS:-2}
+      # Optional: TP-Link cloud account (email + password), only needed for
+      # a device that's actually linked to a Kasa/TP-Link account -- most
+      # devices work with no credentials at all (see kasa-agent/app.py).
+      # Must be both-or-neither. Treat these as secrets: set them in .env,
+      # never commit real values.
+      KASA_USERNAME: ${KASA_USERNAME:-}
+      KASA_PASSWORD: ${KASA_PASSWORD:-}
+    # Kasa devices are addressed by IP internally, discovered by scanning;
+    # if they live on a separate VLAN from the Docker host (as ours do),
+    # this container needs a network path to that VLAN. Bridge networking
+    # is usually enough (outbound traffic is NATed through the host), but
+    # host networking is the fallback if it isn't.
+    # network_mode: host

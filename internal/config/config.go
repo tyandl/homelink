@@ -1,3 +1,11 @@
+// Package config parses homelink.toml down to the generic rule structure
+// (name + trigger + actions, each left as an undecoded toml.Primitive) plus
+// the small amount of infra-level settings (server port, log level) that
+// don't belong to any one service. It deliberately knows nothing about what
+// a "yolink" or "frigate" trigger/action looks like — each service package
+// decodes its own primitives via its own Settings/TriggerConfig/ActionConfig
+// types, keeping services independent of each other and of this package's
+// internals beyond the shared toml.MetaData/toml.Primitive plumbing.
 package config
 
 import (
@@ -14,35 +22,35 @@ import (
 
 const defaultConfigPath = "/config/homelink.toml"
 
-// Config holds all runtime configuration, merged from the optional config file
-// and environment variables. Environment variables always take precedence.
+// Config holds the generic (service-agnostic) parts of homelink's
+// configuration, plus the raw material each service package needs to decode
+// its own settings and rule fields.
 type Config struct {
-	// YoLink API endpoints.
-	YoLinkAPIHost string
-	MQTTBroker    string
+	// Meta is the TOML decode metadata, required to later decode any
+	// Primitive below via Meta.PrimitiveDecode.
+	Meta toml.MetaData
 
-	// YoLink credentials (env var only).
-	YoLinkClientID     string
-	YoLinkClientSecret string
+	// YoLink, Frigate, and Kasa are each service's optional settings
+	// section ([yolink], [frigate], [kasa]), left undecoded. The Defined
+	// flags distinguish an absent section (zero Primitive, must not be
+	// decoded) from an empty-but-present one.
+	YoLink        toml.Primitive
+	YoLinkDefined bool
 
-	// Frigate base URL (e.g. "http://frigate:5000").
-	FrigateBaseURL string
+	Frigate        toml.Primitive
+	FrigateDefined bool
 
-	// Frigate native auth (optional, env var only).
-	FrigateUser     string
-	FrigatePassword string
+	Kasa        toml.Primitive
+	KasaDefined bool
 
-	// FrigateInsecureSkipVerify disables TLS certificate verification for Frigate.
-	// Only set this when Frigate uses a self-signed certificate on a trusted network.
-	FrigateInsecureSkipVerify bool
+	// Rules are the [[rules]] entries, each with its trigger and actions
+	// left undecoded until a service package's Decode function is called
+	// with the service name read from the "service" field.
+	Rules []RuleConfig
 
-	// Mappings associates YoLink devices with Frigate cameras and event labels.
-	Mappings []DeviceMapping
-
-	// HTTP server port. Defaults to 8080.
+	// Port is the HTTP server port. Defaults to 8080.
 	Port int
-
-	// Log verbosity: debug, info, warn, error. Defaults to warn.
+	// LogLevel is one of debug, info, warn, error. Defaults to warn.
 	LogLevel string
 
 	// ConfigFilePath is the path the config file was loaded from, empty if
@@ -55,85 +63,67 @@ type Config struct {
 	ConfigFileChecksum string
 }
 
-// DeviceMapping binds a YoLink device to a Frigate camera event.
-type DeviceMapping struct {
-	// YoLinkDevice is the exact device name as it appears in the YoLink app.
-	YoLinkDevice string `toml:"yolink_device"`
-	// Camera is the Frigate camera name.
-	Camera string `toml:"camera"`
-	// Label is the Frigate event label (e.g. "mail", "person").
-	Label string `toml:"label"`
-	// SubLabel is an optional secondary label.
-	SubLabel string `toml:"sub_label"`
-	// Duration is how long the Frigate event stays open, in seconds. 0 uses the default (30s).
-	Duration int `toml:"duration"`
-	// BoundingBox is an optional [x, y, dx, dy] region in the camera frame where
-	// x,y is the top-left corner and dx,dy is the width and height, all as
-	// fractions of the frame dimensions (0.0–1.0).
-	BoundingBox []float64 `toml:"bounding_box"`
-	// PreCapture is seconds of footage before the trigger to include in the recording.
-	// Omitted when zero, which lets Frigate apply its own default.
-	PreCapture int `toml:"pre_capture"`
-	// IncludeRecording controls whether a recording clip is attached. Default true.
-	IncludeRecording *bool `toml:"include_recording"`
+// RuleConfig is one [[rules]] entry: a name plus its trigger and actions,
+// still undecoded. Trigger and each entry of Actions carry at least a
+// "service" field identifying which service package owns the rest of their
+// fields.
+type RuleConfig struct {
+	Name    string
+	Trigger toml.Primitive
+	Actions []toml.Primitive
 }
 
 // fileConfig is the TOML schema for /config/homelink.toml.
-// Only non-sensitive settings belong here; credentials go in env vars.
 type fileConfig struct {
-	YoLink struct {
-		APIHost    string `toml:"api_host"`
-		MQTTBroker string `toml:"mqtt_broker"`
-	} `toml:"yolink"`
-
-	Frigate struct {
-		BaseURL string `toml:"base_url"`
-	} `toml:"frigate"`
+	YoLink  toml.Primitive `toml:"yolink"`
+	Frigate toml.Primitive `toml:"frigate"`
+	Kasa    toml.Primitive `toml:"kasa"`
 
 	Server struct {
 		Port     int    `toml:"port"`
 		LogLevel string `toml:"log_level"`
 	} `toml:"server"`
 
-	Mappings []DeviceMapping `toml:"mappings"`
+	Rules []struct {
+		Name    string           `toml:"name"`
+		Trigger toml.Primitive   `toml:"trigger"`
+		Actions []toml.Primitive `toml:"actions"`
+	} `toml:"rules"`
 }
 
-// Load reads configuration from the optional config file and environment
-// variables. Environment variables always take precedence over the file.
-// The config file path defaults to /config/homelink.toml and can be
-// overridden with the CONFIG_FILE environment variable.
+// Load reads configuration from the optional config file and the PORT /
+// LOG_LEVEL environment variables. Service-specific settings and
+// credentials are loaded separately by each service package, only when that
+// service is actually referenced by a rule.
 func Load() (*Config, error) {
 	cfg := &Config{
-		YoLinkAPIHost: "https://api.yosmart.com",
-		MQTTBroker:    "tcp://mqtt.api.yosmart.com:8003",
-		Port:          8080,
-		LogLevel:      "warn",
+		Port:     8080,
+		LogLevel: "warn",
 	}
 
 	if err := loadFile(cfg); err != nil {
 		return nil, err
 	}
-	loadEnv(cfg)
 
-	var missing []string
-	if cfg.YoLinkClientID == "" {
-		missing = append(missing, "YOLINK_CLIENT_ID")
+	if v := os.Getenv("PORT"); v != "" {
+		if parsed, err := strconv.Atoi(v); err == nil {
+			cfg.Port = parsed
+		}
 	}
-	if cfg.YoLinkClientSecret == "" {
-		missing = append(missing, "YOLINK_CLIENT_SECRET")
+	if v := os.Getenv("LOG_LEVEL"); v != "" {
+		cfg.LogLevel = v
 	}
-	if cfg.FrigateBaseURL == "" {
-		missing = append(missing, "FRIGATE_BASE_URL (env var or [frigate] base_url in config file)")
-	}
-	if len(missing) > 0 {
-		return nil, fmt.Errorf("missing required configuration: %v", missing)
+
+	if len(cfg.Rules) == 0 {
+		return nil, fmt.Errorf("no [[rules]] configured in %s", firstNonEmpty(os.Getenv("CONFIG_FILE"), defaultConfigPath))
 	}
 
 	return cfg, nil
 }
 
-// loadFile reads the TOML config file and overlays its values onto cfg.
-// A missing file is silently ignored; any other read or parse error is fatal.
+// loadFile reads the TOML config file and populates cfg. A missing file is
+// silently ignored (Load then fails on the empty-rules check above); any
+// other read or parse error is fatal.
 func loadFile(cfg *Config) error {
 	path := firstNonEmpty(os.Getenv("CONFIG_FILE"), defaultConfigPath)
 
@@ -151,7 +141,8 @@ func loadFile(cfg *Config) error {
 	}
 
 	var fc fileConfig
-	if _, err := toml.Decode(string(data), &fc); err != nil {
+	meta, err := toml.Decode(string(data), &fc)
+	if err != nil {
 		return fmt.Errorf("config file %s: %w", path, err)
 	}
 
@@ -160,78 +151,29 @@ func loadFile(cfg *Config) error {
 	cfg.ConfigFileModTime = info.ModTime()
 	cfg.ConfigFileChecksum = hex.EncodeToString(checksum[:])
 
-	if fc.YoLink.APIHost != "" {
-		cfg.YoLinkAPIHost = fc.YoLink.APIHost
-	}
-	if fc.YoLink.MQTTBroker != "" {
-		cfg.MQTTBroker = fc.YoLink.MQTTBroker
-	}
-	if fc.Frigate.BaseURL != "" {
-		cfg.FrigateBaseURL = fc.Frigate.BaseURL
-	}
+	cfg.Meta = meta
+	cfg.YoLink = fc.YoLink
+	cfg.YoLinkDefined = meta.IsDefined("yolink")
+	cfg.Frigate = fc.Frigate
+	cfg.FrigateDefined = meta.IsDefined("frigate")
+	cfg.Kasa = fc.Kasa
+	cfg.KasaDefined = meta.IsDefined("kasa")
+
 	if fc.Server.Port != 0 {
 		cfg.Port = fc.Server.Port
 	}
 	if fc.Server.LogLevel != "" {
 		cfg.LogLevel = fc.Server.LogLevel
 	}
-	cfg.Mappings = fc.Mappings
 
-	return validateMappings(cfg.Mappings)
-}
-
-func validateMappings(mappings []DeviceMapping) error {
-	for i, m := range mappings {
-		if m.YoLinkDevice == "" {
-			return fmt.Errorf("mapping %d: yolink_device is required", i)
+	for i, r := range fc.Rules {
+		if r.Name == "" {
+			return fmt.Errorf("config file %s: rule %d: name is required", path, i)
 		}
-		if m.Camera == "" {
-			return fmt.Errorf("mapping %d (%s): camera is required", i, m.YoLinkDevice)
-		}
-		if m.Label == "" {
-			return fmt.Errorf("mapping %d (%s): label is required", i, m.YoLinkDevice)
-		}
-		if len(m.BoundingBox) != 0 && len(m.BoundingBox) != 4 {
-			return fmt.Errorf("mapping %d (%s): bounding_box must have exactly 4 values [x, y, dx, dy]", i, m.YoLinkDevice)
-		}
+		cfg.Rules = append(cfg.Rules, RuleConfig{Name: r.Name, Trigger: r.Trigger, Actions: r.Actions})
 	}
+
 	return nil
-}
-
-// loadEnv overlays environment variables onto cfg. Non-empty env vars win.
-func loadEnv(cfg *Config) {
-	if v := os.Getenv("YOLINK_API_HOST"); v != "" {
-		cfg.YoLinkAPIHost = v
-	}
-	if v := os.Getenv("MQTT_BROKER"); v != "" {
-		cfg.MQTTBroker = v
-	}
-	if v := os.Getenv("YOLINK_CLIENT_ID"); v != "" {
-		cfg.YoLinkClientID = v
-	}
-	if v := os.Getenv("YOLINK_CLIENT_SECRET"); v != "" {
-		cfg.YoLinkClientSecret = v
-	}
-	if v := os.Getenv("FRIGATE_BASE_URL"); v != "" {
-		cfg.FrigateBaseURL = v
-	}
-	if v := os.Getenv("FRIGATE_USER"); v != "" {
-		cfg.FrigateUser = v
-	}
-	if v := os.Getenv("FRIGATE_PASSWORD"); v != "" {
-		cfg.FrigatePassword = v
-	}
-	if v := os.Getenv("FRIGATE_INSECURE_SKIP_VERIFY"); v == "true" || v == "1" {
-		cfg.FrigateInsecureSkipVerify = true
-	}
-	if v := os.Getenv("PORT"); v != "" {
-		if parsed, err := strconv.Atoi(v); err == nil {
-			cfg.Port = parsed
-		}
-	}
-	if v := os.Getenv("LOG_LEVEL"); v != "" {
-		cfg.LogLevel = v
-	}
 }
 
 func firstNonEmpty(values ...string) string {
