@@ -87,6 +87,20 @@ Two consequences that came out of adding this second kind of source:
 `time_of_day` schedules are deduplicated inside `timer.NewService` by `(Device, At)`, so multiple
 rules sharing one schedule label fire once each rather than once-per-rule-per-firing.
 
+### Named countdowns are persisted; schedules are not
+
+`set`/`cancel`-armed countdowns (but not `time_of_day` schedules) survive a process restart via
+`internal/timer/persist.go`: `Service` tracks each armed timer's absolute expiry instant
+alongside its `*time.Timer` handle (the latter exposes no way to ask "when does this fire," so
+the expiry has to be tracked separately), and rewrites a small JSON file at `TIMER_PERSIST_PATH`
+on every `Set`/`Cancel`/expiry. On startup, `Service.resume` reads that file: a countdown still
+in the future is re-armed for its remaining duration; one whose expiry already passed while the
+process was down fires immediately rather than being dropped — every timer in this codebase
+represents a bounded "do X after some inactivity" window (e.g. `garage_lights_off`), so a late
+fire is judged safer than silently losing the eventual action. `time_of_day` schedules need none
+of this: they're recomputed fresh from config on every `Start()` regardless of restarts, since
+"next 4pm" doesn't depend on any prior process state.
+
 ### Why a Python sidecar for Kasa
 
 Current-firmware TP-Link Kasa devices mostly require KLAP (TP-Link's newer local-protocol
@@ -206,6 +220,7 @@ action  = "turn_on"
 | `YOLINK_NET_ID` | with `YOLINK_LOCAL_HOST` | — | Local Hub's "Net Id" from the YoLink app's hub details (or `[yolink.local] net_id`); not obtainable via the API. |
 | `YOLINK_LOCAL_HTTP_PORT` / `YOLINK_LOCAL_MQTT_PORT` | no | `1080` / `18080` | Override the Local Hub's ports (or `[yolink.local] http_port`/`mqtt_port`). |
 | `TZ` | a rule uses `time_of_day` | UTC | IANA zone name `at` times are interpreted in (zoneinfo is embedded in the binary, no volume mount needed) |
+| `TIMER_PERSIST_PATH` | no | `/cache/timers.json` | Where armed `set` countdowns are persisted so they survive a restart (see `internal/timer/persist.go`); must be on a writable volume, unlike the read-only `/config` mount |
 | `PORT` | no | `8080` | HTTP server port |
 | `LOG_LEVEL` | no | `warn` | Log verbosity: debug, info, warn, error |
 | `CONFIG_FILE` | no | `/config/homelink.toml` | Path to config file |
