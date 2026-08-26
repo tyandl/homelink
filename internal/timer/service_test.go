@@ -9,7 +9,7 @@ import (
 )
 
 func TestSetFiresExpiredEvent(t *testing.T) {
-	svc := NewService(nil)
+	svc := NewService(nil, "")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -31,7 +31,7 @@ func TestSetFiresExpiredEvent(t *testing.T) {
 }
 
 func TestSetResetsExistingTimer(t *testing.T) {
-	svc := NewService(nil)
+	svc := NewService(nil, "")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -57,7 +57,7 @@ func TestSetResetsExistingTimer(t *testing.T) {
 }
 
 func TestCancelPreventsExpiry(t *testing.T) {
-	svc := NewService(nil)
+	svc := NewService(nil, "")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -78,12 +78,12 @@ func TestCancelPreventsExpiry(t *testing.T) {
 }
 
 func TestCancelUnknownTimerIsNoop(t *testing.T) {
-	svc := NewService(nil)
+	svc := NewService(nil, "")
 	svc.Cancel("never set") // must not panic
 }
 
 func TestExecuteSetAndCancel(t *testing.T) {
-	svc := NewService(nil)
+	svc := NewService(nil, "")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -121,7 +121,7 @@ func TestExecuteSetAndCancel(t *testing.T) {
 }
 
 func TestExecuteRejectsWrongConfigType(t *testing.T) {
-	svc := NewService(nil)
+	svc := NewService(nil, "")
 	if err := svc.Execute(context.Background(), "not an ActionConfig"); err == nil {
 		t.Fatal("expected error for wrong config type, got nil")
 	}
@@ -133,7 +133,7 @@ func TestDedupeSchedulesBySameDeviceAndAt(t *testing.T) {
 		{Device: "afternoon", Event: "time_of_day", At: "16:00"}, // duplicate: two rules, same schedule
 		{Device: "evening", Event: "time_of_day", At: "20:00"},
 	}
-	svc := NewService(schedules)
+	svc := NewService(schedules, "")
 	if len(svc.schedules) != 2 {
 		t.Fatalf("got %d deduplicated schedules, want 2: %+v", len(svc.schedules), svc.schedules)
 	}
@@ -142,7 +142,7 @@ func TestDedupeSchedulesBySameDeviceAndAt(t *testing.T) {
 func TestStartStopSchedulesCleanShutdown(t *testing.T) {
 	// A schedule far in the future should never fire during this test; this
 	// just verifies Start/Stop don't hang or panic.
-	svc := NewService([]TriggerConfig{{Device: "far", Event: "time_of_day", At: "03:33"}})
+	svc := NewService([]TriggerConfig{{Device: "far", Event: "time_of_day", At: "03:33"}}, "")
 	ctx, cancel := context.WithCancel(context.Background())
 	if _, err := svc.Start(ctx); err != nil {
 		t.Fatalf("Start: %v", err)

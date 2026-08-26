@@ -109,6 +109,7 @@ Full trigger event vocabulary and action verb reference is in `CLAUDE.md`.
 | `YOLINK_NET_ID` | with `YOLINK_LOCAL_HOST` | — | The Local Hub's "Net Id" from the YoLink app's hub details (or `[yolink.local] net_id`); not obtainable via the API. |
 | `YOLINK_LOCAL_HTTP_PORT` / `YOLINK_LOCAL_MQTT_PORT` | no | `1080` / `18080` | Override the Local Hub's ports (or `[yolink.local] http_port`/`mqtt_port`). |
 | `TZ` | a rule uses `time_of_day` | UTC | IANA zone name `at` times are interpreted in |
+| `TIMER_PERSIST_PATH` | no | `/cache/timers.json` | Where armed `set` countdowns are persisted so they survive a restart; must be on a writable volume |
 | `PORT` | no | `8080` | HTTP server port |
 | `LOG_LEVEL` | no | `warn` | Log verbosity: `debug`, `info`, `warn`, `error` |
 | `CONFIG_FILE` | no | `/config/homelink.toml` | Path to config file |

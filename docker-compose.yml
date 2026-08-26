@@ -6,6 +6,9 @@ services:
       - "8080:8080"
     volumes:
       - ./config:/config:ro
+      # Writable: persists armed timer countdowns (service = "timer" set actions) across
+      # restarts. Optional -- if omitted, timers still work, they just don't survive a restart.
+      - ./cache:/cache
     environment:
       # Required only when a rule's trigger uses service = "yolink".
       YOLINK_CLIENT_ID: ${YOLINK_CLIENT_ID:-}
@@ -30,6 +33,10 @@ services:
       # so no volume mount is needed for this to resolve correctly. Unset
       # means UTC.
       TZ: ${TZ:-}
+
+      # Where armed timer countdowns are persisted so they survive a restart. Must be on
+      # the writable /cache volume above. Default is /cache/timers.json if unset.
+      TIMER_PERSIST_PATH: ${TIMER_PERSIST_PATH:-}
     depends_on:
       - kasa-agent
 

@@ -96,7 +96,11 @@ func main() {
 			}
 		}
 
-		timerService := timer.NewService(schedules)
+		persistPath := os.Getenv("TIMER_PERSIST_PATH")
+		if persistPath == "" {
+			persistPath = "/cache/timers.json"
+		}
+		timerService := timer.NewService(schedules, persistPath)
 		if usedTriggers["timer"] {
 			sources["timer"] = timerService
 		}
