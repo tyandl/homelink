@@ -147,6 +147,14 @@ resolves names to hosts itself:
   hardcoded setup defaults → blank) means an unlinked device that already worked with no
   credentials keeps working identically; verified by running the agent with intentionally wrong
   credentials and confirming the other 18 devices still resolved.
+  **Credentials are now effectively required for current firmware.** After TP-Link's local-auth
+  firmware update, IoT-over-KLAP devices (seen on HS200/HS220/HS300/KS230/KP401/KP405) reject
+  blank credentials *and* the real account password, and accept only the account e-mail with the
+  literal password `kasaSetup` (what the Kasa app itself sends). `app.py: _connect` therefore
+  tries the configured credentials first and, on an `AuthenticationError`, retries once with the
+  trimmed/lowercased `KASA_USERNAME` + `kasaSetup`. This duplicates python-kasa PR #1840, which
+  is unmerged as of 0.12.0 — drop the fallback once a release includes it. Auth failures after
+  both attempts are logged at WARNING (they used to be silent at DEBUG).
 
 Because of the retry path's worst case (roughly two full scans plus the retry delay),
 `internal/kasa.Actuator`'s HTTP client timeout is set well above a normal cache-hit response

@@ -26,7 +26,7 @@ from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from kasa import Discover
+from kasa import AuthenticationError, Discover
 
 logging.basicConfig(level=os.environ.get("KASA_AGENT_LOG_LEVEL", "INFO"))
 logger = logging.getLogger("kasa-agent")
@@ -72,6 +72,14 @@ REFRESH_INTERVAL_SECONDS = float(os.environ.get("KASA_SCAN_INTERVAL_SECONDS", "3
 LOOKUP_MAX_RETRIES = int(os.environ.get("KASA_LOOKUP_MAX_RETRIES", "2"))
 LOOKUP_RETRY_DELAY_SECONDS = float(os.environ.get("KASA_LOOKUP_RETRY_DELAY_SECONDS", "2"))
 AUTH_KWARGS = _auth_env()
+
+# Since TP-Link's local-authentication firmware update, some IoT-over-KLAP
+# devices (seen on HS200/HS220/KS230/KP401/KP405/HS300) reject the real
+# account password but accept the account e-mail with this literal password
+# instead -- it's what the Kasa app itself sends. python-kasa only tries the
+# pair from PR #1840 onward (unreleased as of 0.12.0), so the agent does the
+# same fallback itself, once a device has rejected the given credentials.
+KASA_SETUP_PASSWORD = "kasaSetup"
 
 app = FastAPI()
 
@@ -152,6 +160,36 @@ async def _port_open(ip: str, port: int) -> bool:
     return True
 
 
+async def _connect(host: str):
+    """Discovers and update()s a device, returning it ready to use.
+
+    Tries the configured account credentials first; if the device rejects
+    them with an AuthenticationError, retries once with the account e-mail
+    (trimmed and lowercased, as the Kasa app sends it) and `kasaSetup`. Only
+    applies when credentials are configured at all -- with none, there's no
+    e-mail to build the fallback pair from. Raises whatever the final
+    attempt raised; any device from a failed attempt is disconnected first.
+    """
+    device = await Discover.discover_single(host, timeout=DISCOVER_TIMEOUT_SECONDS, **AUTH_KWARGS)
+    try:
+        await device.update()
+        return device
+    except Exception as exc:
+        await _disconnect(device)
+        if not isinstance(exc, AuthenticationError) or not AUTH_KWARGS:
+            raise
+
+    logger.debug("kasa: %s rejected the account password, retrying with the setup password", host)
+    fallback_kwargs = {"username": AUTH_KWARGS["username"].strip().lower(), "password": KASA_SETUP_PASSWORD}
+    device = await Discover.discover_single(host, timeout=DISCOVER_TIMEOUT_SECONDS, **fallback_kwargs)
+    try:
+        await device.update()
+        return device
+    except Exception:
+        await _disconnect(device)
+        raise
+
+
 async def _identify(host: str) -> Optional[tuple[str, str]]:
     """Identifies a candidate host, or returns None if it isn't a Kasa
     device, isn't reachable, or fails authentication -- distinguishing why
@@ -162,17 +200,18 @@ async def _identify(host: str) -> Optional[tuple[str, str]]:
     cloud account that our blank/default credentials can't satisfy -- left
     unclosed, that leaks an aiohttp session every scan.
     """
-    device = None
     try:
-        device = await Discover.discover_single(host, timeout=DISCOVER_TIMEOUT_SECONDS, **AUTH_KWARGS)
-        await device.update()
-        return device.alias, host
+        device = await _connect(host)
+    except AuthenticationError as exc:
+        logger.warning("kasa: device at %s rejected authentication: %s", host, exc)
+        return None
     except Exception as exc:
         logger.debug("kasa: could not identify device at %s: %s", host, exc)
         return None
+    try:
+        return device.alias, host
     finally:
-        if device is not None:
-            await _disconnect(device)
+        await _disconnect(device)
 
 
 async def resolve_with_retry(alias: str) -> str:
@@ -234,13 +273,9 @@ class ActionRequest(BaseModel):
 async def perform_action(alias: str, request: ActionRequest):
     host = await resolve_with_retry(alias)
 
-    device = None
     try:
-        device = await Discover.discover_single(host, timeout=DISCOVER_TIMEOUT_SECONDS, **AUTH_KWARGS)
-        await device.update()
+        device = await _connect(host)
     except Exception as exc:
-        if device is not None:
-            await _disconnect(device)
         raise HTTPException(status_code=502, detail=f"could not reach kasa device {alias!r} at {host}: {exc}") from exc
 
     try:
