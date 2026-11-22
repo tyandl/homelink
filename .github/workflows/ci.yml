@@ -109,4 +109,7 @@ jobs:
         with:
           context: ./kasa-agent
           push: true
+          build-args: |
+            VERSION=${{ steps.meta.outputs.version }}
+            REVISION=${{ github.sha }}
           tags: ${{ steps.meta.outputs.tags }}

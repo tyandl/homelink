@@ -73,6 +73,12 @@ LOOKUP_MAX_RETRIES = int(os.environ.get("KASA_LOOKUP_MAX_RETRIES", "2"))
 LOOKUP_RETRY_DELAY_SECONDS = float(os.environ.get("KASA_LOOKUP_RETRY_DELAY_SECONDS", "2"))
 AUTH_KWARGS = _auth_env()
 
+# Stamped into the image at build time (see the Dockerfile / CI build-args),
+# so the very first log line says which build is actually running -- a stale
+# image otherwise looks identical to a real failure.
+BUILD_VERSION = os.environ.get("KASA_AGENT_VERSION", "unknown")
+BUILD_REVISION = os.environ.get("KASA_AGENT_REVISION", "unknown")
+
 # Since TP-Link's local-authentication firmware update, some IoT-over-KLAP
 # devices (seen on HS200/HS220/KS230/KP401/KP405/HS300) reject the real
 # account password but accept the account e-mail with this literal password
@@ -247,6 +253,7 @@ async def _refresh_loop() -> None:
 
 @app.on_event("startup")
 async def startup() -> None:
+    logger.info("kasa-agent starting: version=%s revision=%s", BUILD_VERSION, BUILD_REVISION)
     await cache.rescan()
     asyncio.create_task(_refresh_loop())
 
